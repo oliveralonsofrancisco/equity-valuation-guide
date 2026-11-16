@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equity Valuation Desk</title>
+<meta name="description" content="Study terminal for Equity Valuation (Topics 6 and 7), Carmen Aranda 2026-27">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+/* Layout: market-data terminal — softened: graphite ground instead of pure black, reading text in Lexend, mono only for terminal chrome and numbers. Colour roles: amber = clickable, green/red = right/wrong or up/down, blue = formulas and concepts.
+   Original note: — black screen, amber command line + function-key strip, menu column of mnemonics, dense panels with header bars. Single dark look by design. */
+:root{
+  --paper:#0c0d10; --sheet:#14161b; --bar:#1e2128; --ink:#d6d9df; --hi:#f1f2f4; --muted:#ffa028; --label:#a7b1bf; --dim:#858c97; --line:#2b2f37; --zebra:#181a20; --field:#0f1115;
+  --bull:#35d36b; --bull-soft:#08240f; --gold:#ffb000; --gold-soft:#2a1d00;
+  --bear:#ff5c5c; --bear-soft:#2a1012; --blue:#6cbcff; --blue-soft:#0d1d30; --formula:#a9d6ff;
+  --side:#0a0b0e; --side-fg:#ffa028; --side-hi:#000000; --side-line:#24262c;
+  --key:#ffb000; --key-ink:#000000; --hdr:#0d2a4f;
+  --f-display:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --f-body:"Lexend","IBM Plex Sans Condensed",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:2px; color-scheme:dark;
+}
+html{background:var(--paper)}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.62;font-weight:300}
+body.easy{font-size:17px;letter-spacing:.015em;line-height:1.85;word-spacing:.1em}
+body.easy .wrap p,body.easy .wrap li{max-width:70ch}
+*{box-sizing:border-box}
+::selection{background:var(--blue);color:#000}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;line-height:1.2;margin:0;font-weight:600}
+h2{font-size:1.35rem;text-transform:uppercase;letter-spacing:.02em;color:var(--hi)}
+h3{font-size:.86rem;text-transform:uppercase;letter-spacing:.06em;color:var(--label)}
+h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--blue)}
+p{margin:.4rem 0}
+b,strong{color:var(--hi);font-weight:600}
+.mono,.num,td,th{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:.9em}
+a{color:var(--blue)}
+i{color:var(--dim);font-style:normal}
+button,input,select{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+
+/* shell */
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+.side{background:var(--side);color:var(--side-fg);padding:0 0 14px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--line);font-family:var(--f-mono)}
+.brand{display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--gold);color:#000}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-mono);color:#000;font-size:.92rem;display:block;line-height:1.1;letter-spacing:.04em}
+.brand small{font-size:.66rem;color:#000}
+.ring{display:flex;gap:10px;align-items:center;margin:0 10px;padding:8px;border:1px solid var(--side-line);font-size:.72rem;color:var(--dim)}
+.ring b{color:var(--bull)}
+.navg{display:flex;flex-direction:column;gap:0}
+.navg>span{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#000;background:var(--blue);padding:2px 12px;margin-bottom:2px;font-weight:600}
+.navg button{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--side-fg);padding:5px 12px;text-align:left;cursor:pointer;font-size:.8rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.02em}
+.navg button:hover{background:var(--bar)}
+.navg button[aria-selected="true"]{background:var(--gold);color:#000}
+.navg button[aria-selected="true"] .code{color:#000;border-color:#000}
+.navg .fk{color:var(--dim);font-size:.68rem;min-width:18px}
+.navg button[aria-selected="true"] .fk{color:#000}
+.navg .code{font-size:.66rem;color:var(--label);min-width:40px}
+.navg .done{margin-left:auto;width:7px;height:7px;background:var(--side-line)}
+.navg .done.on{background:var(--bull)}
+.sidetools{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding:0 10px}
+.sidetools button{background:var(--bar);border:1px solid var(--side-line);color:var(--side-fg);padding:4px 8px;font-size:.72rem;cursor:pointer;text-transform:uppercase;font-family:var(--f-mono)}
+.sidetools button[aria-pressed="true"]{background:var(--gold);color:#000}
+.navg.pending>span{background:var(--side-line);color:var(--dim)}
+.navg .soon{font-size:.66rem;color:var(--dim);padding:2px 12px;margin:0}
+.fgroup{grid-column:1/-1;background:var(--hdr);color:var(--hi);font-family:var(--f-mono);font-size:.75rem;padding:4px 12px;letter-spacing:.06em}
+.bars .grp{font-size:.7rem;color:#000;background:var(--blue);padding:1px 8px;margin-top:4px;letter-spacing:.08em}
+.side .help{font-size:.66rem;color:var(--dim);padding:0 12px;line-height:1.5}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.cmdbar{display:flex;align-items:stretch;gap:0;background:var(--paper);border-bottom:1px solid var(--line);font-family:var(--f-mono);font-size:.82rem;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;flex-wrap:wrap}
+.cmdbar .menu{display:none;background:var(--gold);color:#000;border:0;padding:0 12px;cursor:pointer;font-weight:700}
+.cmd{flex:1 1 260px;display:flex;align-items:center;gap:8px;padding:7px 12px;min-width:0}
+.cmd .pr{color:var(--gold)}
+.cmd input{flex:1;min-width:0;background:none;border:0;color:var(--hi);font-weight:600;text-transform:uppercase;font-family:var(--f-mono);font-size:.85rem;padding:0;caret-color:var(--gold)}.cmd input:focus{outline:none}.cmd .crumb{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.72rem}
+.cmd .caret{width:8px;height:15px;background:var(--gold);animation:blink 1s steps(1) infinite}
+.cmd .go{background:var(--bull);color:#000;padding:0 6px;font-weight:700}
+@keyframes blink{50%{opacity:0}}
+.cmdbar .clock{padding:7px 12px;color:var(--gold);border-left:1px solid var(--line)}
+.cmdbar .mark{border:0;border-left:1px solid var(--line);background:var(--bar);padding:7px 12px;cursor:pointer;color:var(--muted);font-family:var(--f-mono);text-transform:uppercase;font-size:.75rem}
+.cmdbar .mark.on{background:var(--bull);color:#000}
+.fkeys{display:flex;gap:2px;padding:3px 4px;background:var(--bar);border-bottom:1px solid var(--line);overflow-x:auto;font-family:var(--f-mono)}
+.fkeys button{flex:none;background:var(--key);color:var(--key-ink);border:0;padding:2px 8px;font-size:.7rem;font-weight:700;cursor:pointer;text-transform:uppercase}
+.fkeys button:hover{background:var(--hi)}
+.fkeys button.on{background:var(--bull)}
+.tape{background:var(--paper);color:var(--ink);font-family:var(--f-mono);font-size:.76rem;overflow:hidden;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tape div{display:inline-block;padding:4px 0;animation:tape 70s linear infinite}
+.tape span{margin:0 18px;color:var(--label)}.tape b.flat{color:var(--gold)}.tape b.na{color:var(--dim)}.tape b.up{color:var(--bull)}.tape b.dn{color:var(--bear)}
+@keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){.tape div,.cmd .caret{animation:none}}
+.wrap{padding:14px 16px 70px;max-width:1240px;width:100%}
+section.tab{display:none;flex-direction:column;gap:12px}
+section.tab.on{display:flex}
+
+/* topic hero = security description panel */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center;background:var(--sheet);border:1px solid var(--line);border-top:3px solid var(--gold);padding:14px 16px}
+.hero .eyebrow{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#000;background:var(--blue);display:inline-block;padding:1px 6px}
+.hero h2{font-size:1.5rem;margin:.45rem 0 .4rem;color:var(--hi)}
+.hero p{color:var(--ink);max-width:62ch;opacity:.9}
+.hero svg{width:100%;height:auto;max-width:100%;max-height:230px}
+.lab .out svg{max-height:430px}
+.block>svg{max-height:280px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.chip{font-family:var(--f-mono);font-size:.68rem;border:1px solid var(--line);padding:1px 6px;color:var(--blue)}
+
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.block{background:var(--sheet);border:1px solid var(--line);padding:0 14px 12px;min-width:0}
+.block>h3{margin:0 -14px 10px;padding:5px 14px;background:var(--hdr);color:var(--hi);font-size:.78rem}
+.block ul,.block ol{margin:.3rem 0;padding-left:1.15rem}.block li{margin:.18rem 0}
+.block li::marker{color:var(--blue)}
+.plain{padding:4px 2px;border-bottom:1px solid var(--blue)}
+.key{border:1px solid var(--blue);border-left-width:4px;background:var(--blue-soft);padding:8px 12px;margin:.5rem 0}
+.warn{border:1px solid var(--bear);border-left-width:4px;background:var(--bear-soft);padding:8px 12px;margin:.5rem 0}
+.good{border:1px solid var(--bull);border-left-width:4px;background:var(--bull-soft);padding:8px 12px;margin:.5rem 0}
+.src{font-size:.72rem;color:var(--dim);font-family:var(--f-mono)}
+.tx{font-size:1.05em}.txd{display:block;text-align:center;margin:.6rem 0;overflow-x:auto;overflow-y:hidden;font-size:1.1em;color:var(--formula);padding:6px 0;border-block:1px dashed var(--line)}
+.tx{color:var(--formula)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem;font-family:var(--f-mono)}
+th,td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+td:first-child{color:var(--label)}
+th{font-size:.7rem;letter-spacing:.02em;color:var(--hi);background:var(--hdr);font-weight:600}
+tbody tr:nth-child(even){background:var(--zebra)}
+tr.tot td{font-weight:700;border-top:1px solid var(--gold);color:var(--gold)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line)}
+.vs>div{padding:10px 12px;min-width:0}.vs>div+div{border-left:1px solid var(--line)}
+.vs h4{margin-bottom:.3rem}
+
+/* worked exercise */
+.ex{background:var(--sheet);border:1px solid var(--line)}
+.ex header{display:flex;gap:10px;align-items:baseline;padding:5px 14px;background:var(--hdr);flex-wrap:wrap}
+.ex header b{color:var(--hi);font-family:var(--f-mono);text-transform:uppercase;font-size:.8rem;letter-spacing:.04em}.ex header .src{margin-left:auto;color:var(--label)}
+.ex .q{padding:10px 14px;border-bottom:1px dashed var(--line)}
+.ex ol.steps{margin:0;padding:6px 14px 2px 36px;font-family:var(--f-mono);font-size:.88rem}
+.ex ol.steps li{display:none;padding:3px 0}
+.ex ol.steps li::marker{color:var(--blue)}
+.ex ol.steps li.show{display:list-item;animation:fade .2s}
+@keyframes fade{from{opacity:.2}to{opacity:1}}
+.ex .bar{display:flex;gap:6px;padding:8px 14px 12px;flex-wrap:wrap}
+.btn{border:1px solid var(--muted);background:var(--bar);color:var(--muted);padding:4px 10px;cursor:pointer;font-size:.76rem;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.03em}
+.btn:hover{background:var(--muted);color:#000}
+.btn[data-rho]{text-transform:none}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+.btn.gold{background:var(--bull);border-color:var(--bull);color:#000;font-weight:700}
+.ans{font-family:var(--f-mono);font-weight:700;color:var(--bull)}
+
+/* mcq */
+.mcq{border:1px solid var(--line);padding:10px 14px;background:var(--sheet)}
+.mcq .stem{margin-bottom:.5rem}
+.mcq .opts{display:flex;flex-direction:column;gap:4px}
+.mcq .opts button{text-align:left;border:1px solid var(--line);background:var(--paper);padding:6px 10px;cursor:pointer;display:flex;gap:10px}
+.mcq .opts button:hover{border-color:var(--muted)}
+.mcq .opts button b{font-family:var(--f-mono);color:#000;background:var(--muted);padding:0 5px;height:1.4em}
+.mcq .opts button.ok{border-color:var(--bull);background:var(--bull-soft)}.mcq .opts button.ok b{background:var(--bull)}
+.mcq .opts button.ko{border-color:var(--bear);background:var(--bear-soft)}.mcq .opts button.ko b{background:var(--bear)}
+.mcq .why{display:none;margin-top:8px;font-size:.9rem;color:var(--ink);border-top:1px dashed var(--line);padding-top:6px}
+.why .fx{display:block;margin:.2rem 0 .4rem;color:var(--formula);overflow-x:auto}
+.why ol.sol{margin:.2rem 0;padding-left:1.4rem;font-family:var(--f-mono);font-size:.84rem;font-weight:400}
+.why ol.sol li{padding:1px 0}.why ol.sol li::marker{color:var(--blue)}
+.why ol.sol li.trap{color:var(--bear);list-style:'⚠ ';}
+.why .solh{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+.mcq.wrong .why{border-top:1px solid var(--bear)}
+.mcq.wrong .why .solh{color:var(--bear)}
+.mcq.done .why{display:block}
+.mcq .tag{font-family:var(--f-mono);font-size:.66rem;color:var(--blue);text-transform:uppercase;letter-spacing:.08em}
+
+/* labs */
+.lab{background:var(--sheet);border:1px solid var(--line);padding:0 14px 14px;display:grid;grid-template-columns:minmax(0,290px) minmax(0,1fr);gap:16px}
+.lab h3{grid-column:1/-1;margin:0 -14px;padding:5px 14px;background:var(--hdr);color:var(--hi);font-size:.78rem}
+.ctl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ctl label{display:block;font-size:.74rem;color:var(--label);font-family:var(--f-mono)}
+.ctl label>input,.ctl label>select{display:block;margin-top:2px}
+.ctl label span.v{font-family:var(--f-mono);color:var(--hi);font-size:.82rem}
+.ctl input[type=number],.ctl input[type=text],.ctl select,.mini input,.cfg select,.cfg input{border:1px solid var(--line);padding:4px 8px;background:var(--field);color:var(--hi);font-family:var(--f-mono);width:100%;border-radius:0}
+.ctl input[type=range]{width:100%;accent-color:var(--gold)}
+.out{min-width:0;display:flex;flex-direction:column;gap:10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2px;background:var(--line);border:1px solid var(--line)}
+.kpi{padding:6px 10px;background:var(--paper)}
+.kpi small{display:block;font-size:.68rem;color:var(--label);letter-spacing:.02em;font-family:var(--f-mono)}
+.kpi b{font-family:var(--f-mono);font-size:1.15rem;color:var(--hi)}
+.kpi.hi b{color:var(--bull)}
+.mini td input{width:84px;text-align:right}
+svg text{fill:var(--dim);font-family:var(--f-mono);font-size:11px}
+svg .ink{fill:var(--hi)} svg .lbl{fill:var(--label);font-family:var(--f-mono);font-size:10.5px}
+.ax{stroke:#555}
+.grid line{stroke:#24262c;stroke-dasharray:1 3}
+
+/* flow chain */
+.chain{display:flex;gap:2px;flex-wrap:wrap;font-family:var(--f-mono)}
+.chain div{flex:1 1 130px;padding:6px 18px 6px 20px;background:var(--hdr);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%,10px 50%);min-width:0}
+.chain div:first-child{clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
+.chain b{display:block;font-size:.78rem;text-transform:uppercase;color:var(--formula)}.chain small{color:var(--ink);font-size:.72rem}
+
+/* flash — Leitner boxes */
+.srs{display:flex;gap:2px;flex-wrap:wrap;font-family:var(--f-mono);font-size:.72rem}
+.srs span{background:var(--bar);padding:3px 8px;color:var(--label)}.srs span b{color:var(--hi)}
+.srs span.due b{color:var(--gold)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.card{background:var(--sheet);border:1px solid var(--line);border-top:3px solid var(--blue);display:flex;flex-direction:column;min-height:170px;min-width:0}
+.card.due{border-top-color:var(--gold)}
+.card .f{flex:1;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:left;background:none;border:0;color:inherit;font:inherit}
+.card .f small{color:var(--blue);font-family:var(--f-mono);font-size:.64rem;text-transform:uppercase;display:flex;justify-content:space-between;gap:6px}
+.card .f small i{color:var(--dim)}
+.card .f b{font-family:var(--f-mono);font-size:1rem;font-weight:600}
+.card .b{display:none;font-size:.9rem;color:var(--ink);border-top:1px dashed var(--line);padding-top:6px}
+.card.flip .b{display:block;animation:fade .2s}
+.card .rate{display:none;gap:2px;border-top:1px solid var(--line)}
+.card.flip .rate{display:flex}
+.card .rate button{flex:1;border:0;padding:6px;cursor:pointer;font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;font-weight:700}
+.card .rate .no{background:var(--bear-soft);color:var(--bear)}.card .rate .no:hover{background:var(--bear);color:#000}
+.card .rate .yes{background:var(--bull-soft);color:var(--bull)}.card .rate .yes:hover{background:var(--bull);color:#000}
+
+/* test */
+.cfg{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding-top:10px}
+.cfg label{display:flex;flex-direction:column;font-size:.7rem;color:var(--label);gap:2px;font-family:var(--f-mono);text-transform:uppercase}
+.cfg select,.cfg input{width:auto}
+.tq{display:flex;flex-direction:column;gap:8px}
+.timer{font-family:var(--f-mono);font-size:1rem;padding:2px 10px;background:var(--bear);color:#000;font-weight:700}
+.score{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--f-mono);font-size:.85rem}
+.bars{display:flex;flex-direction:column;gap:6px;font-family:var(--f-mono)}
+.bars .row{display:grid;grid-template-columns:190px minmax(0,1fr) 80px;gap:10px;align-items:center;font-size:.8rem}
+.bars .tr{height:12px;background:var(--field);border:1px solid var(--line)}
+.bars .fl{height:100%;background:var(--bull)}
+.bars .fl.mid{background:var(--gold)}.bars .fl.low{background:var(--bear)}
+.glos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
+.glos div{padding:6px 0;border-bottom:1px solid var(--line)}
+.glos b{font-family:var(--f-mono);color:var(--formula);font-size:.88rem}
+.search{border:1px solid var(--gold);padding:6px 10px;background:var(--field);color:var(--hi);width:100%;max-width:360px;font-family:var(--f-mono);margin-top:8px}
+.flist{display:flex;flex-direction:column;gap:0;border:1px solid var(--line)}
+.fitem{display:grid;grid-template-columns:210px minmax(0,1fr) 150px;gap:12px;align-items:center;background:var(--sheet);border-bottom:1px solid var(--line);padding:6px 12px}
+.fitem:nth-child(even){background:var(--zebra)}
+.fitem>.tx{min-width:0;overflow-x:auto;overflow-y:hidden}
+.fitem>.tx .katex,.fitem>.tx math{white-space:normal}
+.fitem .nm{font-family:var(--f-mono);color:var(--label);font-size:.82rem}.fitem .tx{color:var(--formula)}.fitem .s{font-size:.66rem;color:var(--dim);font-family:var(--f-mono);text-align:right}
+
+/* wide screens: panels flow into columns like a multi-window terminal */
+@media (min-width: 1380px){
+  .wrap{max-width:none}
+  section.dense.on{display:block;column-count:2;column-gap:12px}
+  section.dense>*,section.dense .grid2>*{break-inside:avoid;margin:0 0 12px}
+  section.dense .grid2{display:contents}
+  section.dense>.hero,section.dense>.chain,section.dense>h3.plain,section.dense>.lab{column-span:all}
+  .tq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .tq>.btn,.tq>.block{grid-column:1/-1;justify-self:start}
+  .flist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fitem{grid-template-columns:165px minmax(0,1fr);grid-template-rows:auto auto;column-gap:14px;row-gap:2px;border-right:1px solid var(--line);align-items:start}
+  .fitem .nm{grid-column:1;grid-row:1}.fitem .s{grid-column:1;grid-row:2;text-align:left}.fitem>.tx{grid-column:2;grid-row:1/3;align-self:center}
+  .fitem:nth-child(even){background:var(--sheet)}
+  .fitem:nth-child(4n+1),.fitem:nth-child(4n+2){background:var(--zebra)}
+  .glos{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #lab.on{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+}
+@media (min-width: 2200px){
+  section.dense.on{column-count:3}
+  section.dense>.lab{column-span:none}
+  section.dense .lab,#lab .lab{grid-template-columns:1fr}
+  .lab .ctl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));align-content:start}
+  .lab .ctl .txd,.lab .ctl .chips,.lab .ctl p{grid-column:1/-1}
+  #lab.on{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #lab>.hero{grid-column:1/-1}
+  .tq{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .glos{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (min-width: 3000px){
+  section.dense.on{column-count:4}
+  .flist{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fitem:nth-child(n){background:var(--sheet)}
+}
+
+@media (max-width: 900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:260px;z-index:20;transform:translateX(-100%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px)}
+  .side.open{transform:none}
+  .cmdbar .menu{display:block}
+  .cmdbar .clock{display:none}
+  .wrap{padding:12px 16px 70px}
+  .hero,.grid2,.lab{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr}
+  .glos{grid-template-columns:1fr}
+  .fitem{grid-template-columns:1fr}.fitem .s{text-align:left}
+  .vs{grid-template-columns:1fr}.vs>div+div{border-left:0;border-top:1px solid var(--line)}
+  .bars .row{grid-template-columns:110px minmax(0,1fr) 60px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+<aside class="side" id="side">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="8" fill="#000"/><path d="M7 25V18M12 25V12M17 25V15M22 25V9M27 25V13" stroke="#ffb000" stroke-width="3" stroke-linecap="round"/></svg>
+    <div><b>Equity Valuation Desk</b><small>Topics 6–7 · C. Aranda · 2026–27</small></div>
+  </div>
+  <div class="ring"><svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="#24262c" stroke-width="5"/><circle id="ringArc" cx="22" cy="22" r="18" fill="none" stroke="#35d36b" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 113.1" transform="rotate(-90 22 22)"/></svg><div><b id="ringTxt">0 / 6</b><br>SECTIONS STUDIED</div></div>
+  <nav class="navg" aria-label="Topic 6 Part 1"><span>Topic 6 · Part 1</span>
+    <button data-tab="t61" data-mn="DES"><span class="fk">1</span><span class="code">DES</span><span>Valuation basics</span><i class="done" data-d="t61"></i></button>
+    <button data-tab="t62" data-mn="COMP"><span class="fk">2</span><span class="code">COMP</span><span>Trading comps</span><i class="done" data-d="t62"></i></button>
+    <button data-tab="t63" data-mn="NAV"><span class="fk">3</span><span class="code">NAV</span><span>Asset-based / NAV</span><i class="done" data-d="t63"></i></button>
+    <button data-tab="t64" data-mn="DVD"><span class="fk">4</span><span class="code">DVD</span><span>Distributions</span><i class="done" data-d="t64"></i></button>
+  </nav>
+  <nav class="navg" aria-label="Topic 6 Part 2"><span>Topic 6 · Part 2</span>
+    <button data-tab="t65" data-mn="DDM"><span class="fk">5</span><span class="code">DDM</span><span>Dividend discount model</span><i class="done" data-d="t65"></i></button>
+  </nav>
+  <nav class="navg" aria-label="Topic 7 Part 1"><span>Topic 7 · Part 1</span>
+    <button data-tab="t7" data-mn="PORT"><span class="fk">6</span><span class="code">PORT</span><span>Portfolio risk &amp; return</span><i class="done" data-d="t7"></i></button>
+  </nav>
+  <nav class="navg pending" aria-label="Coming next"><span>Topic 7 · Part 2</span><p class="soon">Not covered yet. Send the slides when you get them.</p></nav>
+  <nav class="navg" aria-label="Practice"><span>Practice</span>
+    <button data-tab="test" data-mn="TEST"><span class="fk">7</span><span class="code">TEST</span><span>Practice test</span></button>
+    <button data-tab="stats" data-mn="STAT"><span class="fk">8</span><span class="code">STAT</span><span>My stats</span></button>
+    <button data-tab="cards" data-mn="FLIP"><span class="fk">9</span><span class="code">FLIP</span><span>Flashcards</span></button>
+  </nav>
+  <nav class="navg" aria-label="Reference"><span>Reference</span>
+    <button data-tab="lab" data-mn="CALC"><span class="fk">10</span><span class="code">CALC</span><span>Valuation lab</span></button>
+    <button data-tab="form" data-mn="FRML"><span class="fk">11</span><span class="code">FRML</span><span>All formulas</span></button>
+    <button data-tab="glos" data-mn="GLOS"><span class="fk">12</span><span class="code">GLOS</span><span>Glossary</span></button>
+  </nav>
+  <div class="sidetools">
+    <button id="bEasy" type="button" aria-pressed="false">Extra spacing</button>
+  </div>
+  <p class="help">Type a mnemonic in the command line (e.g. DDM) and press Enter, or click a yellow key.</p>
+</aside>
+
+<div class="main">
+  <div class="cmdbar">
+    <button class="menu" id="bMenu" type="button" aria-label="Open menu">MENU</button>
+    <label class="cmd" for="cmdIn"><span class="pr">&gt;</span><input id="cmdIn" type="text" autocomplete="off" spellcheck="false" placeholder="DES" aria-label="Command"><span class="go">GO</span><span class="crumb" id="crumb"></span></label>
+    <span class="clock" id="clock">--:--:--</span>
+    <button class="mark" id="bMark" type="button">Mark as studied</button>
+  </div>
+  <div class="fkeys" id="fkeys"></div>
+  <div class="tape" aria-hidden="true"><div id="tape"></div></div>
+  <div class="wrap">
+
+<!-- ============ T6.1 ============ -->
+<section class="tab dense" id="t61">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 6 · Part 1 · Section 1 · Basic ideas</div>
+      <h2>Intrinsic value vs market price</h2>
+      <p>Valuation estimates the theoretically correct (intrinsic or fair) value of a company, investment or asset, as opposed to its cost or current market value. If the two differ, the market has mispriced the security.</p>
+      <div class="chips"><span class="chip">stakeholder vs shareholder</span><span class="chip">5 reasons to value</span><span class="chip">3 model families</span></div>
+    </div>
+    <div>
+      <svg id="gauge" viewBox="0 0 360 170" role="img" aria-label="Intrinsic value versus market price gauge"></svg>
+      <div class="ctl" style="margin-top:6px">
+        <label>Market price <span class="v" id="gP">€30</span><input id="gPr" type="range" min="10" max="50" value="30"></label>
+        <label>Your intrinsic value estimate <span class="v" id="gV">€36</span><input id="gVr" type="range" min="10" max="50" value="36"></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Stakeholders and shareholders</h3>
+      <p>A <b>stakeholder</b> is any entity (individual, group, organization or government) with a vested interest in the success of an organization and affected directly or indirectly by its performance.</p>
+      <p>A <b>shareholder</b> owns at least one share of the joint-stock company and has a financial stake in its success.</p>
+      <div class="key">All shareholders are stakeholders, but not all stakeholders are shareholders.</div>
+    </div>
+    <div class="block"><h3>Why do we value assets?</h3>
+      <ul>
+        <li><b>Buying or selling a business</b>: fair transaction price.</li>
+        <li><b>Strategic planning</b>: invest only in projects that raise NPV; every investment decision is a mini-valuation.</li>
+        <li><b>Capital financing</b>: lenders assess the ability to generate cash flows and service debt.</li>
+        <li><b>Securities investing</b>: is the stock or bond priced in line with intrinsic value and comparables?</li>
+        <li><b>Tax and financial reporting</b>: fair value for compliance, estate planning, reporting.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="block"><h3>The three families of equity valuation models</h3>
+    <div class="grid3" style="margin-top:8px">
+      <div class="good"><b>1 · Present value models</b><br>Discounted models (dividends, cash flows). Intrinsic value of the business on its own. <i>In this course: only DDM.</i></div>
+      <div class="key"><b>2 · Comparable company analysis</b><br>"Comps": ratios of similar listed companies applied to the target. A <i>relative</i> valuation.</div>
+      <div class="warn"><b>3 · Asset-based models</b><br>Fair market value of assets minus liabilities. Capital-intensive firms or liquidation scenarios.</div>
+    </div>
+    <p class="src">Topic 6 part 1, slides 3–8</p>
+  </div>
+
+  <h3 class="plain">Test your understanding <span class="src">(slide 7 and "practice and solutions", slide 45)</span></h3>
+  <div class="grid2" id="t61q"></div>
+</section>
+
+<!-- ============ T6.2 ============ -->
+<section class="tab dense" id="t62">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 6 · Part 1 · Section 2 · Comparable company analysis</div>
+      <h2>Peers → multiples → value</h2>
+      <p>Trading comps infer value from what similar listed companies trade for. "10× EBITDA" means the market pays €10 for every €1 of annual EBITDA. A market-based value is not necessarily the correct fundamental value.</p>
+      <div class="chips"><span class="chip">EV vs equity value</span><span class="chip">EV/EBITDA</span><span class="chip">P/E</span><span class="chip">mean vs median</span></div>
+    </div>
+    <svg viewBox="0 0 380 210" role="img" aria-label="EV bridge from enterprise value to share price">
+      <rect x="20" y="30" width="70" height="150" fill="var(--blue)" rx="3"/>
+      <rect x="110" y="30" width="70" height="36" fill="var(--bear)" rx="3"/>
+      <rect x="200" y="66" width="70" height="114" fill="var(--bull)" rx="3"/>
+      <line x1="90" y1="30" x2="110" y2="30" class="ax"/><line x1="180" y1="66" x2="200" y2="66" class="ax"/>
+      <text x="55" y="22" text-anchor="middle" class="ink">€500m</text><text x="145" y="22" text-anchor="middle" class="ink">−€120m</text><text x="235" y="58" text-anchor="middle" class="ink">€380m</text>
+      <text x="55" y="198" text-anchor="middle">EV = 10×50</text><text x="145" y="198" text-anchor="middle">net debt</text><text x="235" y="198" text-anchor="middle">equity</text>
+      <path d="M282 120h22" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#ar)"/>
+      <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--ink)"/></marker></defs>
+      <text x="340" y="112" text-anchor="middle" class="lbl">÷ 20m</text><text x="340" y="132" text-anchor="middle" class="lbl" style="font-weight:700">€19.00</text>
+    </svg>
+  </div>
+
+  <div class="chain">
+    <div><b>1 · Find peers</b><small>business similarity first</small></div>
+    <div><b>2 · Collect data</b><small>market + financial, same date</small></div>
+    <div><b>3 · Build the table</b><small>comparable definitions</small></div>
+    <div><b>4 · Calculate multiples</b><small>EV and equity measures</small></div>
+    <div><b>5 · Apply and judge</b><small>implied value + interpretation</small></div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Step 1 · Choosing peers</h3>
+      <p>The most judgment-intensive step. Match on <b>industry</b>, <b>geography</b> (market, currency, regulation), <b>size</b>, <b>growth</b> and <b>profitability</b>.</p>
+      <div class="vs"><div><h4>Retailer A</h4>Fast expansion · strong online sales · high margins · limited debt</div><div><h4>Retailer B</h4>Slow sales growth · weak profitability · high store rents · higher operating risk</div></div>
+      <div class="warn">Two firms in the same industry need not deserve the same multiple.</div>
+    </div>
+    <div class="block"><h3>Step 2 · Two company values</h3>
+      <p><b>Equity value</b> (market cap) = shares × price. Example: 1m × €20 = €20m.</p>
+      <p><b>Enterprise value</b> ≈ value of the operating business before splitting it between lenders and shareholders.</p>
+      <span class="txd" data-tex="EV = \text{Market cap} + \text{Debt} - \text{Cash}"></span>
+      <p>€20m + €8m − €3m = <b>€25m</b>. Market prices refer to a <i>date</i>; financial metrics refer to a <i>period</i> (LTM or forward).</p>
+    </div>
+  </div>
+
+  <div class="block"><h3>Match the multiple to the claim</h3>
+    <div class="vs">
+      <div><h4>Enterprise-value multiples</h4>EV/Revenue · EV/EBITDA · EV/EBIT<br><small>Pre-financing operating metrics → give <b>EV</b>. Subtract net debt to reach equity.</small></div>
+      <div><h4>Equity-value multiples</h4>P/E (Equity value / Net income) · P/Book<br><small>Metrics attributable to equity holders → give <b>equity value or price</b> directly.</small></div>
+    </div>
+    <div class="warn">Never multiply EBITDA by a P/E, or net income by an EV/EBITDA.</div>
+    <p><b>EBITDA</b> = earnings before interest, taxes, depreciation and amortization. An operating earnings measure, <i>not</i> a cash flow: it ignores capex, working-capital investment and taxes.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Steps 3–4 · Comps table (slide 22)</h3>
+      <div class="tbl"><table><thead><tr><th>€m</th><th>Mkt cap</th><th>Net debt</th><th>EV</th><th>EBITDA</th><th>EV/EBITDA</th></tr></thead><tbody>
+        <tr><td>Peer A</td><td>600</td><td>200</td><td>800</td><td>100</td><td>8.0×</td></tr>
+        <tr><td>Peer B</td><td>1,050</td><td>150</td><td>1,200</td><td>120</td><td>10.0×</td></tr>
+        <tr><td>Peer C</td><td>1,560</td><td>240</td><td>1,800</td><td>150</td><td>12.0×</td></tr>
+        <tr class="tot"><td>Mean = median</td><td></td><td></td><td></td><td></td><td>10.0×</td></tr></tbody></table></div>
+    </div>
+    <div class="block"><h3>Mean or median?</h3>
+      <div class="vs"><div><h4>Mean</h4>Sum ÷ number of peers. Sensitive to extreme values.</div><div><h4>Median</h4>Middle value after sorting. More robust with an extreme multiple.</div></div>
+      <div class="key">Never delete an outlier just to get the value you wanted.</div>
+      <p>A lower EV/EBITDA can reflect slower <b>growth</b>, lower <b>margins</b>, heavier <b>investment</b> needs or higher <b>risk</b>. A low multiple does not mean the stock is cheap.</p>
+    </div>
+  </div>
+
+  <div class="ex"><header><b>Step 5 · Value the target with EV/EBITDA</b><span class="src">slide 25</span></header>
+    <div class="q">Target: EBITDA €50m · peer median 10× · net debt €120m · diluted shares 20m.</div>
+    <ol class="steps"><li>EV = 10 × €50m = <b>€500m</b> (apply the peer multiple to target EBITDA).</li><li>Equity value = €500m − €120m = <b>€380m</b> (net debt = debt − cash, so cash is already inside).</li><li>Price = €380m ÷ 20m = <span class="ans">€19.00 per share</span>.</li></ol>
+    <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+
+  <div class="grid2">
+    <div class="ex"><header><b>Alternative: forward P/E</b><span class="src">slides 26–27</span></header>
+      <div class="q">P/E = price ÷ EPS. Company A: €30 / €2 = 15×, investors pay €15 for each €1 of annual EPS (not a guaranteed 15-year payback). Peers trade at 12×, 14×, 16×; target expected EPS next year = €1.20.</div>
+      <ol class="steps"><li>Median peer P/E = <b>14×</b>.</li><li>Price = 14 × €1.20 = <span class="ans">€16.80</span>. P/E gives the price directly (equity multiple). Match forward P/E with forecast EPS.</li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+    <div class="block"><h3>Why €19.00 vs €16.80?</h3>
+      <p>Not automatically an error. The two multiples rely on different measures (depreciation, interest, taxes). Check growth, leverage, tax rates, margins, capital intensity and accounting policies.</p>
+      <div class="key">Comps often produce a <b>range</b>, not one indisputable price.</div>
+      <div class="vs"><div><h4>Low P/E may mean</h4>slower expected growth · higher business or financial risk · maybe undervalued</div><div><h4>High P/E may mean</h4>strong expected growth · low risk / high quality · maybe too expensive</div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Common student mistakes</h3>
+      <div class="tbl"><table><tbody>
+        <tr><td><b>Mismatch</b></td><td style="text-align:left">P/E with EBITDA; EV/EBITDA with earnings</td></tr>
+        <tr><td><b>Dates</b></td><td style="text-align:left">prices and financials from inconsistent periods</td></tr>
+        <tr><td><b>Peers</b></td><td style="text-align:left">inappropriate businesses or risk profiles</td></tr>
+        <tr><td><b>Accounting</b></td><td style="text-align:left">unadjusted exceptional items, inconsistent EBITDA</td></tr>
+        <tr><td><b>Interpretation</b></td><td style="text-align:left">treating the median as an objectively true value</td></tr>
+      </tbody></table></div>
+      <p><b>Where comps are used:</b> equity research, IPO pricing, M&amp;A advisory, cross-checking DCF terminal-value multiples.</p>
+    </div>
+    <div class="ex"><header><b>Practice exercise</b><span class="src">slide 34 · EV/EBITDA = 9.0×</span></header>
+      <div class="q">EBITDA €80m · gross debt €250m · excess cash €50m · 40m shares. Find net debt, EV, equity value, price.</div>
+      <ol class="steps"><li>Net debt = 250 − 50 = <b>€200m</b></li><li>EV = 9 × 80 = <b>€720m</b></li><li>Equity = 720 − 200 = <b>€520m</b></li><li>Price = 520 / 40 = <span class="ans">€13.00</span></li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+  </div>
+  <p class="src">Open the <a href="#lab" data-go="lab">Valuation lab</a> to run your own comps table.</p>
+</section>
+
+<!-- ============ T6.3 ============ -->
+<section class="tab dense" id="t63">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 6 · Part 1 · Section 3 · Asset-based valuation models</div>
+      <h2>What it owns − what it owes</h2>
+      <p>Intrinsic value of a common share from the estimated value of the assets minus the estimated value of liabilities and preferred shares. Book (carrying) values are adjusted to estimated current values.</p>
+      <div class="chips"><span class="chip">book equity</span><span class="chip">adjusted NAV</span><span class="chip">IAS 16 cost vs revaluation</span></div>
+    </div>
+    <svg viewBox="0 0 360 220" role="img" aria-label="Balance sheet: assets equal liabilities plus net asset value">
+      <rect x="30" y="20" width="130" height="180" fill="var(--blue-soft)" stroke="var(--blue)"/>
+      <rect x="200" y="20" width="130" height="64" fill="var(--bear-soft)" stroke="var(--bear)"/>
+      <rect x="200" y="84" width="130" height="116" fill="var(--bull-soft)" stroke="var(--bull)"/>
+      <text x="95" y="100" text-anchor="middle" class="lbl" style="font-weight:700">Assets €7.0m</text>
+      <text x="95" y="120" text-anchor="middle">(current value)</text>
+      <text x="265" y="56" text-anchor="middle" class="lbl">Liabilities €2.5m</text>
+      <text x="265" y="138" text-anchor="middle" class="lbl" style="font-weight:700">NAV €4.5m</text>
+      <text x="265" y="158" text-anchor="middle">€4.50 / share</text>
+      <text x="180" y="114" text-anchor="middle" class="ink" style="font-size:20px">=</text>
+    </svg>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Manufacturing company (slide 39)</h3>
+      <div class="tbl"><table><thead><tr><th>€m</th><th>Book</th><th>Current</th></tr></thead><tbody>
+        <tr><td>Land and buildings</td><td>3.0</td><td>4.0</td></tr><tr><td>Machinery</td><td>2.0</td><td>1.5</td></tr><tr><td>Inventory</td><td>1.0</td><td>1.0</td></tr><tr><td>Cash</td><td>0.5</td><td>0.5</td></tr>
+        <tr class="tot"><td>Total assets</td><td>6.5</td><td>7.0</td></tr>
+        <tr><td>Bank debt</td><td>2.0</td><td>2.0</td></tr><tr><td>Other liabilities</td><td>0.5</td><td>0.5</td></tr>
+        <tr class="tot"><td>Total liabilities</td><td>2.5</td><td>2.5</td></tr>
+        <tr class="tot"><td>Equity</td><td>4.0 (book)</td><td>4.5 (adj. NAV)</td></tr></tbody></table></div>
+      <p>With 1m ordinary shares: €4.5m ÷ 1m = <b>€4.50 per share</b>. This is an estimated asset-based value, not necessarily the observed market price.</p>
+    </div>
+    <div class="block"><h3>IAS 16: two ways to carry PP&amp;E</h3>
+      <div class="vs"><div><h4>Cost model (IAS 16.30)</h4>Cost − accumulated depreciation − impairment. A rise in land value does <b>not</b> raise the carrying amount.</div><div><h4>Revaluation model (IAS 16.31)</h4>Fair value at revaluation − later depreciation and impairment. Revalue often enough to stay close to fair value.</div></div>
+      <p>IAS 16.29: the policy is chosen per <b>asset class</b>, not per asset.</p>
+      <div class="tbl"><table><thead><tr><th>Route</th><th>Reported equity</th><th>Adjustments</th><th>Adj. NAV</th></tr></thead><tbody>
+        <tr><td>Cost model</td><td>4.0</td><td>+1.0 land, −0.5 machinery</td><td>4.5</td></tr>
+        <tr><td>Revaluation model</td><td>4.5</td><td>none needed</td><td>4.5</td></tr></tbody></table></div>
+      <div class="key">Both routes give the same adjusted NAV; only the adjustment needed differs. The accounting model changes reported equity, not the assets.</div>
+    </div>
+  </div>
+
+  <div class="vs" style="background:var(--sheet)">
+    <div><h4>Useful for</h4><ul><li>Real estate companies (land, buildings)</li><li>Investment holding companies (financial assets)</li><li>Companies in liquidation</li><li>Asset-intensive businesses</li></ul></div>
+    <div><h4>Limitations</h4><ul><li>Brands and customer relationships are hard to value</li><li>Future earnings and growth may not be captured</li><li>Some assets have no observable market value</li><li>Different models give different estimates</li></ul></div>
+  </div>
+</section>
+
+<!-- ============ T6.4 ============ -->
+<section class="tab dense" id="t64">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 6 · Part 1 · Section 4 · Equity distributions</div>
+      <h2>Cash, stock, scrip and rights</h2>
+      <p>Companies pay regular cash dividends, but also special dividends, stock dividends, scrip (flexible) dividends, share buybacks and returns of contributed capital. The standard DDM only discounts <b>expected cash dividends per share</b>.</p>
+      <div class="chips"><span class="chip">payout ratio</span><span class="chip">4 dates</span><span class="chip">P ÷ (1+s)</span><span class="chip">Iberdrola 2026</span></div>
+    </div>
+    <svg viewBox="0 0 380 150" role="img" aria-label="Four dividend dates timeline">
+      <line x1="20" y1="70" x2="360" y2="70" stroke="var(--ink)" stroke-width="2"/>
+      <g><circle cx="45" cy="70" r="9" fill="var(--blue)"/><text x="45" y="50" text-anchor="middle" class="lbl">Declaration</text><text x="45" y="100" text-anchor="middle">announced</text></g>
+      <g><circle cx="145" cy="70" r="9" fill="var(--bear)"/><text x="145" y="50" text-anchor="middle" class="lbl" style="font-weight:700">Ex-dividend</text><text x="145" y="100" text-anchor="middle">new buyers lose it</text><text x="145" y="116" text-anchor="middle">price falls ≈ D</text></g>
+      <g><circle cx="245" cy="70" r="9" fill="var(--gold)"/><text x="245" y="50" text-anchor="middle" class="lbl">Record</text><text x="245" y="100" text-anchor="middle">holders identified</text></g>
+      <g><circle cx="335" cy="70" r="9" fill="var(--bull)"/><text x="335" y="50" text-anchor="middle" class="lbl">Payment</text><text x="335" y="100" text-anchor="middle">cash paid</text></g>
+    </svg>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Cash dividends and payout</h3>
+      <p>Net income €100m, cash dividends €40m, retained €60m (simplified).</p>
+      <span class="txd" data-tex="\text{Payout} = \frac{\text{Dividends}}{\text{Net income}} = \frac{40}{100} = 40\%\qquad b = 1-\text{payout} = 60\%"></span>
+      <p>If the company pays €2 per share, <span class="tx" data-tex="D_0 = 2"></span>. A DDM discounts <b>expected</b> future dividends <span class="tx" data-tex="D_1, D_2,\dots"></span>. Dividends can also come from distributable reserves, not only current-year profit.</p>
+    </div>
+    <div class="block"><h3>Why the price drops on the ex-date</h3>
+      <div class="tbl"><table><thead><tr><th></th><th>Before ex-date</th><th>On ex-date</th></tr></thead><tbody>
+        <tr><td>100 shares</td><td>× €20 = €2,000</td><td>× €19 = €1,900</td></tr>
+        <tr><td>Cash received</td><td>€0</td><td>€100</td></tr>
+        <tr class="tot"><td>Total wealth</td><td>€2,000</td><td>€2,000</td></tr></tbody></table></div>
+      <p>Cash leaves the company, so the theoretical price falls by €1 per share, all else equal.</p>
+    </div>
+  </div>
+
+  <div class="block"><h3>Not all distributions are dividends: BME 2025</h3>
+    <svg viewBox="0 0 640 70" style="width:100%;height:auto" role="img" aria-label="BME 2025 distributions split">
+      <rect x="0" y="10" width="622" height="30" fill="var(--bull)"/><rect x="622" y="10" width="14.7" height="30" fill="var(--gold)"/><rect x="636.7" y="10" width="3.3" height="30" fill="var(--bear)"/>
+      <text x="8" y="30" style="fill:#000">Dividends €41,503.35m (+10.65% vs 2024, 5th year of growth)</text>
+      <text x="640" y="60" text-anchor="end">+ share premium repayments €982m + capital reductions €186m = €42,671.35m</text>
+    </svg>
+    <div class="grid3">
+      <div><b>Ordinary cash dividend</b><br>Charged to profits or distributable reserves.</div>
+      <div><b>Share premium repayment</b><br>1m shares issued at €5 with €1 nominal → capital €1m + premium €4m. Repaying €1m from premium is a return of <i>contributed equity</i>.</div>
+      <div><b>Capital (nominal) reduction</b><br>Nominal €10 → €8 on 1m shares: cash returned = (10 − 8) × 1m = €2m. Shares and ownership % unchanged.</div>
+    </div>
+    <div class="key">All three transfer cash, but their legal and accounting origins differ. Treat returns of capital separately; do not add them mechanically to regular DPS.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Cash vs stock dividend</h3>
+      <svg viewBox="0 0 320 170" style="width:100%;height:auto" role="img" aria-label="Wealth after a cash dividend and after a stock dividend">
+        <rect x="30" y="20" width="50" height="120" fill="var(--blue)"/><text x="55" y="158" text-anchor="middle">before</text><text x="55" y="14" text-anchor="middle" class="ink">€2,000</text>
+        <rect x="110" y="26" width="50" height="114" fill="var(--blue)"/><rect x="110" y="20" width="50" height="6" fill="var(--gold)"/><text x="135" y="158" text-anchor="middle">€1 cash</text><text x="135" y="14" text-anchor="middle" class="ink">1,900+100</text>
+        <rect x="190" y="20" width="50" height="120" fill="var(--blue)"/><g stroke="var(--sheet)"><line x1="190" y1="40" x2="240" y2="40"/><line x1="190" y1="60" x2="240" y2="60"/><line x1="190" y1="80" x2="240" y2="80"/><line x1="190" y1="100" x2="240" y2="100"/><line x1="190" y1="120" x2="240" y2="120"/></g><text x="215" y="158" text-anchor="middle">10% stock</text><text x="215" y="14" text-anchor="middle" class="ink">110×18.18</text>
+      </svg>
+      <span class="txd" data-tex="P_{\text{after}} = \frac{P_{\text{before}}}{1+\text{stock dividend rate}} = \frac{20}{1.10} = 18.18"></span>
+      <p>Cash dividend: money leaves the company. Stock dividend: the same equity value is split into more shares. Ownership: 100/1,000 = 10% before and 110/1,100 = 10% after.</p>
+    </div>
+    <div class="block"><h3>Scrip / flexible dividend (dividendo flexible)</h3>
+      <p>Each existing share gets one <b>free allocation right</b> (derecho de asignación gratuita). A right is not a share: a set number of rights is needed per new share.</p>
+      <div class="tbl"><table><thead><tr><th>Choice</th><th>You get</th><th>Who pays</th><th>Shares outstanding</th></tr></thead><tbody>
+        <tr><td>A · company cash</td><td>fixed cash</td><td>company</td><td>no change</td></tr>
+        <tr><td>B · sell rights</td><td>market price</td><td>other investors</td><td>can increase</td></tr>
+        <tr><td>C · new shares</td><td>rights ÷ ratio</td><td>company issues</td><td>increases</td></tr></tbody></table></div>
+      <div class="key">The source of the cash is the key difference between A and B. Tax treatment can also differ.</div>
+    </div>
+  </div>
+
+  <div class="block"><h3>Iberdrola, January 2026 (real terms)</h3>
+    <p>1 right per share · <b>73 rights</b> per new share · cash alternative <b>€0.253</b> gross per share. Timeline: 28 Oct 2025 programme info → 8 Jan 2026 final ratio → 12–26 Jan election and rights trading → 2 Feb cash paid → 4 Feb new shares trade.</p>
+    <div class="lab" style="grid-template-columns:minmax(0,260px) minmax(0,1fr);padding:14px;border:0">
+      <div class="ctl">
+        <label>Shares held<input id="ibN" type="number" value="730" min="0" step="1"></label>
+        <label>Rights per new share<input id="ibR" type="number" value="73" min="1"></label>
+        <label>Company cash per share (€)<input id="ibC" type="number" value="0.253" step="0.001"></label>
+        <label>Market price of a right (€, hypothetical)<input id="ibM" type="number" value="0.24" step="0.01"></label>
+      </div>
+      <div class="kpis" id="ibOut"></div>
+    </div>
+    <div class="ex"><header><b>Check your understanding</b><span class="src">slides 73–74</span></header>
+      <div class="q">A student owns 146 Iberdrola shares under the January 2026 terms. (1) How many rights? (2) How many new shares? (3) Gross cash if cash is elected?</div>
+      <ol class="steps"><li>146 shares → <b>146 rights</b></li><li>146 / 73 = <b>2 new shares</b></li><li>146 × €0.253 = <span class="ans">€36.94</span> gross cash</li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+  </div>
+
+  <div class="block"><h3>Which dividends enter the DDM?</h3>
+    <div class="vs"><div><h4>Included</h4>Regular expected cash dividends. Special or irregular cash dividends in a multi-period DDM. <span class="tx" data-tex="D_t"></span> = expected cash dividend per share at time t.</div><div><h4>Not a separate cash flow</h4>Extra shares from a stock dividend (no cash paid). Account consistently for the share count and future DPS. Flexible programmes need careful cash-vs-share treatment.</div></div>
+  </div>
+</section>
+
+<!-- ============ T6.5 ============ -->
+<section class="tab dense" id="t65">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 6 · Part 2 · Dividend discount model</div>
+      <h2>Discount the dividends</h2>
+      <p>The DDM values a share as the present value of the cash dividends expected, plus any selling price. The discount rate is the cost of equity <span class="tx" data-tex="k_e"></span>, usually from CAPM.</p>
+      <div class="chips"><span class="chip">one-period</span><span class="chip">multi-year</span><span class="chip">Gordon</span><span class="chip">multistage</span><span class="chip">CAPM β</span></div>
+    </div>
+    <svg viewBox="0 0 380 200" role="img" aria-label="Which DDM to use">
+      <g font-size="12">
+      <rect x="10" y="10" width="170" height="40" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="95" y="35" text-anchor="middle" class="lbl">Hold 1 year → one-period</text>
+      <rect x="200" y="10" width="170" height="40" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="285" y="35" text-anchor="middle" class="lbl">Hold N years → multi-year</text>
+      <rect x="10" y="80" width="170" height="40" rx="6" fill="var(--bull-soft)" stroke="var(--bull)"/><text x="95" y="105" text-anchor="middle" class="lbl">Constant g forever → Gordon</text>
+      <rect x="200" y="80" width="170" height="40" rx="6" fill="var(--gold-soft)" stroke="var(--gold)"/><text x="285" y="105" text-anchor="middle" class="lbl">g changes → multistage</text>
+      <rect x="10" y="150" width="360" height="40" rx="6" fill="var(--bear-soft)" stroke="var(--bear)"/><text x="190" y="175" text-anchor="middle" class="lbl">No dividends yet → value at 1st dividend, discount</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>CAPM and beta</h3>
+      <span class="txd" data-tex="k_e = r_f + \beta\,(r_m - r_f)"></span>
+      <p>β measures sensitivity to market returns (systematic risk), <b>not</b> total volatility. β = 1.5: the stock tends to move 1.5 pp for a 1 pp market move. β = 1: expected return equals the market return. <span class="tx" data-tex="(r_m-r_f)"></span> is the equity risk premium.</p>
+      <div class="key">Beta is an estimate, not directly observed. Bloomberg, Yahoo Finance and Morningstar can report different betas for the same stock (different periods, frequency, index, adjustments) without any being wrong.</div>
+    </div>
+    <div class="block"><h3>One-period and multi-year DDM</h3>
+      <span class="txd" data-tex="V_0 = \frac{D_1}{(1+k_e)} + \frac{P_1}{(1+k_e)}"></span>
+      <span class="txd" data-tex="V_0 = \sum_{t=1}^{N}\frac{D_t}{(1+r)^t} + \frac{P_N}{(1+r)^N}"></span>
+      <p>With constant growth, <span class="tx" data-tex="D_n = D_0(1+g)^n"></span>. The multi-year model does <b>not</b> require constant growth: each dividend can be forecast separately.</p>
+    </div>
+  </div>
+
+  <div class="ex"><header><b>One-period DDM</b><span class="src">slides 43 / 49–50</span></header>
+    <div class="q">D<sub>0</sub> = $4.00, g = 20% for the year, r<sub>f</sub> = 6%, r<sub>m</sub> = 11%, β = 1.2. Expected price at year-end $15.40. Value the stock.</div>
+    <ol class="steps"><li><span class="tx" data-tex="D_1 = 4(1.20) = \$4.80"></span></li><li><span class="tx" data-tex="k_e = 0.06 + 1.2(0.11-0.06) = 12.0\%"></span></li><li><span class="tx" data-tex="V = \frac{4.80}{1.12} + \frac{15.40}{1.12} = 4.29 + 13.75"></span> = <span class="ans">$18.04</span></li></ol>
+    <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+
+  <div class="grid2">
+    <div class="ex"><header><b>Multiple holding periods</b><span class="src">slide 52</span></header>
+      <div class="q">D<sub>0</sub> = $1.00, g = 6%, r = 14.1%, sell for $15.30 in two years.</div>
+      <ol class="steps"><li>D<sub>1</sub> = 1.06; D<sub>2</sub> = 1.06² = 1.1236</li><li><span class="tx" data-tex="V_0 = \frac{1.06}{1.141} + \frac{1.1236+15.30}{1.141^2} = 0.929 + 12.615"></span></li><li>= <span class="ans">$13.54</span></li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+    <div class="ex"><header><b>Three-year holding period</b><span class="src">slides 12–13 (part 2)</span></header>
+      <div class="q">D<sub>1</sub> = €2.00, D<sub>2</sub> = €2.50, D<sub>3</sub> = €3.00, P<sub>3</sub> = €60, r = 10%.</div>
+      <ol class="steps"><li>PV(D<sub>1</sub>) = 2/1.10 = 1.8182</li><li>PV(D<sub>2</sub>) = 2.50/1.10² = 2.0661</li><li>PV(D<sub>3</sub>+P<sub>3</sub>) = 63/1.10³ = 47.3328</li><li>P<sub>0</sub> = <span class="ans">€51.22</span>: an investor requiring 10% would pay about €51.22 today.</li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Gordon growth model</h3>
+      <span class="txd" data-tex="P_0 = \frac{D_0(1+g)}{k-g} = \frac{D_1}{k-g}\qquad g = b\times ROE"></span>
+      <ul><li>Dividend growth is constant and perpetual.</li><li>Required return is constant.</li><li><b>Requires g &lt; k.</b></li></ul>
+      <p><span class="tx" data-tex="b = 1-\text{payout}"></span>, payout = DPS / EPS. ROE measures how effectively retained earnings generate additional earnings. The formula is the sum of a geometric series.</p>
+      <div class="warn">Unsuitable when the company pays no dividend, is young and entering its growth phase, or has growth expected to change toward its long-term rate.</div>
+    </div>
+    <div class="ex"><header><b>Global Transporters</b><span class="src">slide 60</span></header>
+      <div class="q">Price $28 · recent DPS $1.95 · EPS $4.25 · ROE 25% · required return 20%. (1) Gordon value; (2) what growth adds; (3) under/over/fair?</div>
+      <ol class="steps"><li>b = 1 − 1.95/4.25 = 0.5412; g = 0.5412 × 25% = <b>13.53%</b></li><li>D<sub>1</sub> = 1.95 × 1.1353 = 2.2138</li><li>V<sub>0</sub> = 2.2138 / (0.20 − 0.1353) = <span class="ans">$34.21</span></li><li>No-growth value = 1.95 / 0.20 = $9.75 → growth adds <b>$24.46</b></li><li>$28 &lt; $34.21 → <b>undervalued</b></li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+  </div>
+
+  <div class="block"><h3>Multi-year vs Gordon</h3>
+    <div class="tbl"><table><thead><tr><th>Aspect</th><th style="text-align:left">Multi-year holding period</th><th style="text-align:left">Gordon growth</th></tr></thead><tbody>
+      <tr><td>Horizon</td><td style="text-align:left">finite (2, 3… years)</td><td style="text-align:left">infinite</td></tr>
+      <tr><td>Dividends</td><td style="text-align:left">each forecast separately</td><td style="text-align:left">constant growth g</td></tr>
+      <tr><td>Selling price</td><td style="text-align:left">included at the end</td><td style="text-align:left">none estimated separately</td></tr>
+      <tr><td>Equation</td><td style="text-align:left"><span class="tx" data-tex="\sum D_t/(1+r)^t + P_N/(1+r)^N"></span></td><td style="text-align:left"><span class="tx" data-tex="D_1/(r-g),\ r>g"></span></td></tr></tbody></table></div>
+  </div>
+
+  <div class="block"><h3>Multistage DDM</h3>
+    <p><b>Three-stage</b>: young firms entering growth (high growth → transition → mature perpetual growth). <b>Two-stage</b>: moderate growth expected to rise to the long-term rate, or super-growth companies.</p>
+    <svg id="msvg" viewBox="0 0 640 220" style="width:100%;height:auto" role="img" aria-label="Present value of each dividend and of the terminal value, supernormal growth exercise"></svg>
+    <p class="src">Bars: PV of each dividend and of the terminal value P<sub>5</sub> for the exercise below. Terminal value at the start of the last stage: <span class="tx" data-tex="P_n = D_{n+1}/(k-g_L)"></span>, discounted n periods.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="ex"><header><b>Temporary supernormal growth</b><span class="src">slide 68</span></header>
+      <div class="q">g = 20% for 3 years, 15% for 2 years, then 6% forever. D<sub>0</sub> = $1.49, k = 12%.</div>
+      <ol class="steps"><li>D<sub>1</sub>=1.788 · D<sub>2</sub>=2.1456 · D<sub>3</sub>=2.5747 · D<sub>4</sub>=2.9609 · D<sub>5</sub>=3.4051</li><li>D<sub>6</sub> = 3.4051 × 1.06 = 3.6094; P<sub>5</sub> = 3.6094 / (0.12 − 0.06) = <b>60.156</b></li><li>PV of D<sub>1</sub>…D<sub>5</sub> = 1.5964 + 1.7105 + 1.8326 + 1.8817 + 1.9321 = 8.9534</li><li>PV of P<sub>5</sub> = 60.156 / 1.12⁵ = 34.134</li><li>V<sub>0</sub> = <span class="ans">$43.09</span></li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+    <div class="ex"><header><b>Delayed dividend initiation</b><span class="src">slide 71</span></header>
+      <div class="q">No dividends for 3 years. From year 4, growth 5% forever and payout 45%. E<sub>4</sub> = $3.45, k = 10%.</div>
+      <ol class="steps"><li>D<sub>4</sub> = 0.45 × 3.45 = <b>$1.5525</b></li><li>P<sub>3</sub> = D<sub>4</sub>/(k − g) = 1.5525/0.05 = <b>$31.05</b> (Gordon gives the value one year <i>before</i> D<sub>4</sub>)</li><li>V<sub>0</sub> = 31.05 / 1.10³ = <span class="ans">$23.33</span></li></ol>
+      <div class="bar"><button class="btn pri" data-step>Next step</button><button class="btn" data-all>Show all</button></div></div>
+  </div>
+
+  <h3 class="plain">DDM: CFA practice <span class="src">(slide 54, part 2)</span></h3>
+  <div class="grid2" id="t65q"></div>
+</section>
+
+<!-- ============ T7 ============ -->
+<section class="tab dense" id="t7">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Topic 7 · Part 1 · Portfolio risk and return</div>
+      <h2>Diversify: risk is more than the average</h2>
+      <p>Last year's winning asset class rarely repeats (REITs +50.5% in 2021, −20.2% in 2022). A portfolio aims to be less dependent on forecasting the single best performer. Its risk depends on how the assets move <i>together</i>.</p>
+      <div class="chips"><span class="chip">σ and variance</span><span class="chip">covariance / ρ</span><span class="chip">opportunity set</span><span class="chip">efficient frontier</span><span class="chip">systematic risk</span></div>
+    </div>
+    <div>
+      <svg id="dowSvg" viewBox="0 0 360 180" role="img" aria-label="Dow 30 average stock volatility versus equal-weight portfolio volatility">
+        <rect x="40" y="20" width="110" height="134" fill="var(--bear)" rx="3"/><rect x="200" y="64" width="110" height="90" fill="var(--bull)" rx="3"/>
+        <text x="95" y="14" text-anchor="middle" class="ink">6.72%</text><text x="255" y="58" text-anchor="middle" class="ink">4.51%</text>
+        <text x="95" y="172" text-anchor="middle">avg stock σ</text><text x="255" y="172" text-anchor="middle">equal-weight portfolio σ</text>
+        <text x="255" y="110" text-anchor="middle" style="fill:#000;font-weight:700">−32.9%</text>
+      </svg>
+      <p class="src">Dow 30, monthly returns Jan 2009–Dec 2013: same 30 stocks, same 1.69% average return.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Two benefits of combining securities</h3>
+      <ol><li><b>Avoid a disaster</b> from overinvesting in one asset. $10,000 fully in Reddit in 2026 (to 6 Nov): −58.63% → $4,137.</li><li><b>Substantially reduce risk</b>, measured by variance or standard deviation.</li></ol>
+      <p>A portfolio: €10,000 as €5,000 Stock A, €3,000 Stock B, €2,000 bonds → weights 50%, 30%, 20% (sum 100%).</p>
+    </div>
+    <div class="block"><h3>Measuring risk</h3>
+      <span class="txd" data-tex="s^2 = \frac{1}{K-1}\sum_{i=1}^{K}(R_i-\bar R)^2 \qquad s=\sqrt{s^2}"></span>
+      <p>Variance measures dispersion around the mean (volatility). σ is in the same units as returns. A wider, flatter density (variance 100) is riskier than a narrow, peaked one (variance 10). VaR is another measure (CFA Level II).</p>
+    </div>
+  </div>
+
+  <div class="block"><h3>Portfolio mean and variance (N assets)</h3>
+    <span class="txd" data-tex="E(R_p) = \sum_{i=1}^{N} w_i\bar R_i"></span>
+    <span class="txd" data-tex="Var(R_p) = \sum_{i=1}^{N}\sum_{j=1}^{N} w_iw_j\rho_{ij}s_is_j = \underbrace{\sum_{i=1}^{N} w_i^2s_i^2}_{\text{N variance terms}} + \underbrace{\sum_{i\neq j} w_iw_j\rho_{ij}s_is_j}_{\text{N(N-1) covariance terms}}"></span>
+    <div class="grid3">
+      <div><b>Weights</b> can be negative but must sum to 1.</div>
+      <div><b>Covariance</b>: do returns move together (+) or inversely (−)?</div>
+      <div><b>Correlation</b> <span class="tx" data-tex="\rho_{ij} = \frac{Cov_{ij}}{s_is_j}"></span>, from −1 to +1.</div>
+    </div>
+    <div class="key">As N grows, covariance terms grow disproportionately versus variance terms. What matters when adding a stock is its correlation with what you already hold.</div>
+  </div>
+
+  <div class="lab"><h3>Two-asset opportunity set</h3>
+    <div class="ctl">
+      <label>Correlation ρ <span class="v" id="pRho">0.15</span><input id="pRhoR" type="range" min="-1" max="1" step="0.05" value="0.15"></label>
+      <label>E(R<sub>A</sub>) %<input id="pEA" type="number" value="8" step="0.5"></label>
+      <label>σ<sub>A</sub> %<input id="pSA" type="number" value="10" step="0.5"></label>
+      <label>E(R<sub>B</sub>) %<input id="pEB" type="number" value="15" step="0.5"></label>
+      <label>σ<sub>B</sub> %<input id="pSB" type="number" value="25" step="0.5"></label>
+      <label>Risk-free % (for CAL)<input id="pRf" type="number" value="2" step="0.25"></label>
+      <div class="chips"><button class="btn" data-rho="-1" type="button">ρ = −1</button><button class="btn" data-rho="0" type="button">ρ = 0</button><button class="btn" data-rho="1" type="button">ρ = +1</button></div>
+    </div>
+    <div class="out"><svg id="pSvg" viewBox="0 0 560 330" style="width:100%;height:auto" role="img" aria-label="Opportunity set chart"></svg><div class="kpis" id="pOut"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="block"><h3>Extreme correlations</h3>
+      <p><b>ρ = +1</b>: <span class="tx" data-tex="\sigma_p = w_1s_1 + w_2s_2"></span>. A straight line; no diversification benefit.</p>
+      <p><b>ρ &lt; +1</b>: <span class="tx" data-tex="\sigma_p < w_1s_1 + w_2s_2"></span>. The set bends to the left.</p>
+      <p><b>ρ = −1</b>: <span class="tx" data-tex="\sigma_p = |w_1s_1 - w_2s_2|"></span>. Zero risk is reachable with <span class="tx" data-tex="w_1 = \frac{s_2}{s_1+s_2}"></span>.</p>
+      <div class="key">Holding all else constant (positive weights), higher correlation → more volatile portfolio; lower correlation → less volatile.</div>
+      <p><b>Diversification ratio</b> = weighted average of individual σ ÷ portfolio σ.</p>
+    </div>
+    <div class="block"><h3>Efficient frontier</h3>
+      <svg viewBox="0 0 320 200" style="width:100%;height:auto" role="img" aria-label="Minimum variance frontier with global minimum variance portfolio">
+        <line x1="30" y1="180" x2="310" y2="180" class="ax"/><line x1="30" y1="10" x2="30" y2="180" class="ax"/>
+        <path d="M270 30 Q 60 60 100 105 Q 60 150 270 175" fill="none" stroke="var(--line)" stroke-width="3"/>
+        <path d="M270 30 Q 120 45 96 100" fill="none" stroke="var(--bull)" stroke-width="3"/>
+        <circle cx="96" cy="103" r="5" fill="var(--gold)"/><text x="104" y="118" class="ink">D · global min-variance</text>
+        <text x="190" y="30" class="ink" style="fill:var(--bull)">efficient frontier</text>
+        <text x="165" y="170">rest of MVF (inefficient)</text>
+        <text x="300" y="195" text-anchor="end">σ</text><text x="34" y="18">E(R)</text>
+      </svg>
+      <p><b>MVF</b>: minimum variance for each expected return. <b>GMV (D)</b>: lowest-risk portfolio on the MVF. <b>Markowitz efficient frontier</b>: the MVF above the GMV. No risk-averse investor holds a portfolio to the right of the MVF.</p>
+      <p>Adding an asset that is not perfectly correlated pushes the opportunity set further to the northwest.</p>
+    </div>
+  </div>
+
+  <div class="lab"><h3>Limits of diversification</h3>
+    <div class="ctl">
+      <label>Number of holdings N <span class="v" id="dN">10</span><input id="dNr" type="range" min="1" max="60" value="10"></label>
+      <label>Individual σ (%) <span class="v" id="dS">25</span><input id="dSr" type="range" min="5" max="60" value="25"></label>
+      <label>Average pairwise ρ <span class="v" id="dR">0.20</span><input id="dRr" type="range" min="0" max="1" step="0.05" value="0.2"></label>
+      <span class="txd" data-tex="\sigma_p^2 = \frac{\sigma^2}{N} + \left(1-\frac{1}{N}\right)\rho\sigma^2"></span>
+    </div>
+    <div class="out"><svg id="dSvg" viewBox="0 0 560 280" style="width:100%;height:auto" role="img" aria-label="Portfolio volatility against number of holdings"></svg><div class="kpis" id="dOut"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="vs" style="background:var(--sheet)">
+      <div><h4>Firm-specific risk</h4><small>idiosyncratic · unsystematic · diversifiable</small><br>Product recall, lawsuit, disappointing earnings, loss of a key customer. Shrinks as 1/N.</div>
+      <div><h4>Market risk</h4><small>systematic · common · not diversifiable</small><br>Interest-rate rise, recession, inflation shock, global crisis. The risk floor that remains.</div>
+    </div>
+    <div class="block"><h3>Reading the curve</h3>
+      <ul><li>Falling part: idiosyncratic risk diluted by more holdings.</li><li>Horizontal asymptote: common exposure remains.</li><li>Much of the benefit came with about 25–30 stocks in the illustration; not a universal threshold.</li><li>Higher ρ → higher risk floor. If markets fail totally, diversification is a false promise.</li></ul>
+      <p><b>Crypto?</b> Ask how a small allocation changes the risk of the whole portfolio: standalone volatility, correlation (also in sell-offs), weight.</p>
+    </div>
+  </div>
+
+  <div class="block"><h3>Annual vs daily units (252 trading days)</h3>
+    <span class="txd" data-tex="E(R_d)\approx \frac{E(R_a)}{252}\qquad \sigma_d \approx \frac{\sigma_a}{\sqrt{252}}\qquad \text{Sharpe} = \frac{E(R_p)-R_f}{\sigma_p}"></span>
+    <div class="tbl"><table><thead><tr><th>Asset</th><th>Annual E(R)</th><th>Daily E(R)</th><th>Annual σ</th><th>Daily σ</th></tr></thead><tbody>
+      <tr><td>A</td><td>8.00%</td><td>0.0317%</td><td>10.00%</td><td>0.630%</td></tr>
+      <tr><td>B</td><td>15.00%</td><td>0.0595%</td><td>25.00%</td><td>1.575%</td></tr>
+      <tr><td>M = 75.2% A + 24.8% B</td><td>9.73%</td><td>0.0386%</td><td>10.44%</td><td>0.658%</td></tr>
+      <tr><td>Risk-free</td><td>2.00%</td><td>0.0079%</td><td>0</td><td>0</td></tr></tbody></table></div>
+    <p>ρ<sub>AB</sub> = 0.15. Sharpe(M) annual = (9.73 − 2.00)/10.44 ≈ <b>0.741</b>; daily ≈ 0.0467; 0.0467 × √252 ≈ 0.741. Weights and the tangency portfolio stay the same; numbers and slopes change with the time unit. Always use one horizon for returns, σ and r<sub>f</sub>.</p>
+  </div>
+<div class="block"><h3>Excel recipes for portfolio work <span class="src">(not in the slides · for spreadsheet exercises)</span></h3>
+    <div class="tbl"><table><thead><tr><th>What you need</th><th>Excel</th></tr></thead><tbody>
+      <tr><td>Mean return</td><td><span class="mono">=AVERAGE(B2:B61)</span></td></tr>
+      <tr><td>Sample variance / σ (K − 1)</td><td><span class="mono">=VAR.S(B2:B61)</span> · <span class="mono">=STDEV.S(B2:B61)</span></td></tr>
+      <tr><td>Sample covariance</td><td><span class="mono">=COVARIANCE.S(B2:B61,C2:C61)</span></td></tr>
+      <tr><td>Correlation ρ</td><td><span class="mono">=CORREL(B2:B61,C2:C61)</span></td></tr>
+      <tr><td>Portfolio E(R) = Σ wᵢRᵢ</td><td><span class="mono">=SUMPRODUCT(W,ER)</span></td></tr>
+      <tr><td>Portfolio variance w′Σw</td><td><span class="mono">=MMULT(TRANSPOSE(W),MMULT(COV,W))</span> (W as a column)</td></tr>
+      <tr><td>Daily → annual σ</td><td><span class="mono">=STDEV.S(daily)*SQRT(252)</span></td></tr>
+      <tr><td>Sharpe ratio</td><td><span class="mono">=(ERp-Rf)/SDp</span></td></tr></tbody></table></div>
+    <div class="key"><b>Solver, tangency portfolio M:</b> objective = Sharpe cell → <i>Max</i>; changing cells = weights; constraint Σw = 1 (and w ≥ 0 if no short sales). <b>GMV:</b> objective = σp → <i>Min</i>, same constraints. <b>Frontier:</b> minimise σp subject to E(Rp) = target, repeat for several targets.</div>
+  </div>
+</section>
+
+<!-- ============ TEST ============ -->
+<section class="tab" id="test">
+  <div class="hero" style="grid-template-columns:1fr">
+    <div><div class="eyebrow">Practice</div><h2>Practice test</h2>
+    <p>New questions every time: same procedures and wording as the slides, with new numbers. Format A/B/C with explanation. Choose topics, number of questions and the timer.</p></div>
+  </div>
+  <div class="block cfg">
+    <label>Topics<select id="cTop"><option value="all">All covered so far</option>
+      <optgroup label="Topic 6 · Part 1"><option value="p61">Whole Part 1</option><option value="basics">Valuation basics</option><option value="comps">Trading comps</option><option value="asset">Asset-based / NAV</option><option value="dist">Distributions</option></optgroup>
+      <optgroup label="Topic 6 · Part 2"><option value="ddm">Dividend discount model</option></optgroup>
+      <optgroup label="Topic 7 · Part 1"><option value="port">Portfolio risk and return</option></optgroup>
+      <optgroup label="Review"><option value="wrong">My wrong answers</option></optgroup></select></label>
+    <label>Type<select id="cType"><option value="all">Theory + numerical</option><option value="num">Numerical only</option><option value="th">Theory only</option></select></label>
+    <label>Questions<input id="cN" type="number" value="15" min="3" max="60"></label>
+    <label>Minutes per question<select id="cT"><option value="0">No timer</option><option value="3">3 (standard)</option><option value="4" selected>4 (with adaptation)</option></select></label>
+    <label>Question mix<select id="cAd"><option value="ad">Adaptive: more of my weak topics</option><option value="even">Even across topics</option></select></label>
+    <label>Correction<select id="cMode"><option value="now">After each answer</option><option value="end">At the end</option></select></label>
+    <button class="btn pri" id="bGo" type="button">Start test</button>
+  </div>
+  <div class="score" id="tHead"></div>
+  <div class="tq" id="tBox"><div class="block"><p>Press <b>Start test</b>. Example of what you will get: an EV/EBITDA valuation with new peers, a Gordon value with g = b × ROE, a two-asset portfolio σ with a new ρ…</p></div></div>
+  <div id="tEnd"></div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="tab" id="stats">
+  <div class="hero" style="grid-template-columns:1fr"><div><div class="eyebrow">Practice</div><h2>My stats</h2><p>Every answer from the practice test and the inline questions is stored in this browser.</p></div></div>
+  <div class="kpis" id="sK"></div>
+  <div class="block"><h3>Accuracy by topic</h3><div class="bars" id="sBars"></div></div>
+  <div class="block"><h3>Recent tests</h3><div class="tbl" id="sTests"></div></div>
+  <div><button class="btn" id="bReset" type="button">Reset stats</button> <span id="resetAsk"></span></div>
+</section>
+
+<!-- ============ CARDS ============ -->
+<section class="tab" id="cards">
+  <div class="hero" style="grid-template-columns:1fr"><div><div class="eyebrow">Practice</div><h2>Flashcards</h2><p>Spaced repetition: tap a card to see the answer, then mark <b>Again</b> or <b>Got it</b>. Cards you know move up a box and come back later (box 1 = now, 2 = 1 day, 3 = 3 days, 4 = 7 days, 5 = 14 days); a miss sends a card back to box 1.</p>
+  <div class="srs" id="srs"></div>
+  <div class="chips" id="cardF"></div></div></div>
+  <div class="cards" id="cardBox"></div>
+</section>
+
+<!-- ============ LAB ============ -->
+<section class="tab" id="lab">
+  <div class="hero" style="grid-template-columns:1fr"><div><div class="eyebrow">Reference</div><h2>Valuation lab</h2><p>Calculators that show each step, loaded with the slide examples. Change any input.</p></div></div>
+
+  <div class="lab"><h3>Comps engine (EV/EBITDA and P/E)</h3>
+    <div class="ctl">
+      <label>Multiple<select id="cmM"><option value="ev">EV/EBITDA</option><option value="pe">P/E</option></select></label>
+      <label>Statistic<select id="cmS"><option value="med">Median</option><option value="mean">Mean</option></select></label>
+      <label>Target metric (EBITDA €m or EPS €)<input id="cmT" type="number" value="50" step="0.01"></label>
+      <label>Target net debt €m (EV only)<input id="cmD" type="number" value="120"></label>
+      <label>Diluted shares (m)<input id="cmSh" type="number" value="20"></label>
+    </div>
+    <div class="out">
+      <div class="tbl mini"><table><thead><tr><th>Peer</th><th id="cmH1">EV</th><th id="cmH2">EBITDA</th><th>Multiple</th><th>Use</th></tr></thead><tbody id="cmBody"></tbody></table></div>
+      <div><button class="btn" id="cmAdd" type="button">Add peer</button></div>
+      <div class="kpis" id="cmOut"></div><div id="cmSteps" class="good"></div>
+    </div>
+  </div>
+
+  <div class="lab"><h3>NAV builder</h3>
+    <div class="ctl"><label>Ordinary shares (m)<input id="nvSh" type="number" value="1" step="0.1"></label><p class="src">Edit book and current values in the table.</p></div>
+    <div class="out"><div class="tbl mini"><table><thead><tr><th>Item</th><th>Book</th><th>Current</th></tr></thead><tbody id="nvBody"></tbody></table></div><div class="kpis" id="nvOut"></div></div>
+  </div>
+
+  <div class="lab"><h3>DDM builder (any number of stages)</h3>
+    <div class="ctl">
+      <label>D<sub>0</sub> (last dividend paid)<input id="ddD" type="number" value="1.49" step="0.01"></label>
+      <label>Required return k (%)<input id="ddK" type="number" value="12" step="0.1"></label>
+      <label>Stage growth rates, comma separated, one per year<input id="ddG" type="text" value="20,20,20,15,15" style="border:1px solid var(--line);border-radius:7px;padding:5px 8px;background:var(--paper)"></label>
+      <label>Long-term growth g<sub>L</sub> (%)<input id="ddL" type="number" value="6" step="0.1"></label>
+      <p class="src">Leave the stage list empty for a pure Gordon model.</p>
+    </div>
+    <div class="out"><div class="tbl" id="ddTbl"></div><div class="kpis" id="ddOut"></div></div>
+  </div>
+
+  <div class="lab"><h3>CAPM + Gordon quick check</h3>
+    <div class="ctl">
+      <label>r<sub>f</sub> %<input id="qRf" type="number" value="6" step="0.1"></label>
+      <label>r<sub>m</sub> %<input id="qRm" type="number" value="11" step="0.1"></label>
+      <label>β<input id="qB" type="number" value="1.2" step="0.05"></label>
+      <label>D<sub>0</sub><input id="qD" type="number" value="1.95" step="0.01"></label>
+      <label>EPS<input id="qE" type="number" value="4.25" step="0.01"></label>
+      <label>ROE %<input id="qR" type="number" value="25" step="0.5"></label>
+      <label>Use k from<select id="qK"><option value="capm">CAPM</option><option value="man">Manual k</option></select></label>
+      <label>Manual k %<input id="qKm" type="number" value="20" step="0.1"></label>
+      <label>Market price<input id="qP" type="number" value="28" step="0.1"></label>
+    </div>
+    <div class="out"><div class="kpis" id="qOut"></div><div id="qMsg"></div></div>
+  </div>
+</section>
+
+<!-- ============ FORMULAS ============ -->
+<section class="tab" id="form">
+  <div class="hero" style="grid-template-columns:1fr"><div><div class="eyebrow">Reference</div><h2>All formulas</h2><p>Every formula in Topics 6 and 7 with the slide it comes from.</p><input class="search" id="fQ" type="search" placeholder="Search formulas…"></div></div>
+  <div class="flist" id="fList"></div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="tab" id="glos">
+  <div class="hero" style="grid-template-columns:1fr"><div><div class="eyebrow">Reference</div><h2>Glossary</h2><input class="search" id="gQ" type="search" placeholder="Search terms…"></div></div>
+  <div class="block"><div class="glos" id="gList"></div></div>
+</section>
+
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS={get(k,d){try{const v=localStorage.getItem('ev_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ev_'+k,JSON.stringify(v))}catch(e){}}};
+const f2=x=>(Math.round(x*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const f1=x=>(Math.round(x*10)/10).toFixed(1);
+const pc=(x,d=2)=>(x*100).toFixed(d)+'%';
+const R=(a,b,st=1)=>{const n=Math.round((b-a)/st);return +(a+st*Math.floor(Math.random()*(n+1))).toFixed(6)};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const TOPICS={basics:'T6 P1 · Valuation basics',comps:'T6 P1 · Trading comps',asset:'T6 P1 · Asset-based',dist:'T6 P1 · Distributions',ddm:'T6 P2 · DDM',port:'T7 P1 · Portfolio'};
+const PARTS=[['Topic 6 · Part 1',['basics','comps','asset','dist']],['Topic 6 · Part 2',['ddm']],['Topic 7 · Part 1',['port']]];
+const inSel=(sel,t)=>sel==='all'||sel===t||(sel==='p61'&&PARTS[0][1].includes(t));
+
+/* ---------- KaTeX ---------- */
+function tex(root){if(!window.katex)return;(root||document).querySelectorAll('[data-tex]').forEach(el=>{if(el.dataset.done)return;try{katex.render(el.dataset.tex,el,{throwOnError:false,output:'mathml',displayMode:el.classList.contains('txd')||el.classList.contains('fx')||!!el.closest('.fitem')});el.dataset.done=1}catch(e){el.textContent=el.dataset.tex}})}
+window.addEventListener('load',()=>tex());
+
+/* ---------- theme / easy reading ---------- */
+function applyEasy(on){document.body.classList.toggle('easy',on);$('#bEasy').setAttribute('aria-pressed',on)}
+applyEasy(LS.get('easy',false));
+$('#bEasy').onclick=()=>{const on=!document.body.classList.contains('easy');LS.set('easy',on);applyEasy(on)};
+
+/* ---------- ticker ---------- */
+const TAPE={basics:'BASICS',comps:'COMPS',asset:'NAV',dist:'DVD',ddm:'DDM',port:'PORT'};
+function renderTape(){const L=LS.get('log',[]),wk=Date.now()-7*864e5;const it=Object.keys(TOPICS).map(k=>{const A=L.filter(x=>x.t===k);if(!A.length)return `<span>${TAPE[k]} <b class="na">NO DATA</b></span>`;
+    const acc=A.filter(x=>x.ok).length/A.length,N=A.filter(x=>x.d>=wk),O=A.filter(x=>x.d<wk);const an=N.length?N.filter(x=>x.ok).length/N.length:acc,ao=O.length?O.filter(x=>x.ok).length/O.length:null;
+    const arr=ao===null||Math.abs(an-ao)<.02?'■':an>ao?'▲':'▼';const cl=acc>=.7?'up':acc<.5?'dn':'flat';
+    return `<span>${TAPE[k]} <b class="${cl}">${Math.round(acc*100)}% ${arr}</b> <i>${A.length}q</i></span>`});
+  const W=LS.get('wrong',[]).length,tests=LS.get('tests',[]),lt=tests[tests.length-1],st=LS.get('studied',{}),ns=studyTabs.filter(t=>st[t]).length;
+  it.push(`<span>WRONG TO REVIEW <b class="${W?'dn':'up'}">${W}</b></span>`,`<span>CARDS DUE <b class="${cardsDue()?'flat':'up'}">${cardsDue()}</b></span>`,`<span>STUDIED <b class="${ns===studyTabs.length?'up':'flat'}">${ns}/${studyTabs.length}</b></span>`,`<span>LAST TEST <b class="${!lt?'na':lt.ok/lt.n>=.7?'up':lt.ok/lt.n<.5?'dn':'flat'}">${lt?Math.round(lt.ok/lt.n*100)+'%':'—'}</b></span>`);
+  const h=it.join('');$('#tape').innerHTML=h+h}
+
+/* ---------- nav ---------- */
+const navBtns=$$('.navg button[data-tab]');
+const studyTabs=['t61','t62','t63','t64','t65','t7'];
+function go(id){if(!document.getElementById(id))id='t61';$$('section.tab').forEach(s=>s.classList.toggle('on',s.id===id));navBtns.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));const b=navBtns.find(b=>b.dataset.tab===id);const g=b.closest('.navg').querySelector('span').textContent;$('#crumb').textContent=`${g} › ${b.children[2].textContent}`;$('#cmdIn').value=b.dataset.mn;$$('#fkeys button').forEach(k=>k.classList.toggle('on',k.dataset.go===id));$('#bMark').hidden=!studyTabs.includes(id);updMark(id);LS.set('tab',id);try{history.replaceState(null,'','#'+id)}catch(e){}$('#side').classList.remove('open');window.scrollTo(0,0);tex();if(id==='stats')renderStats();if(id==='cards')renderCards()}
+navBtns.forEach(b=>b.onclick=()=>go(b.dataset.tab));
+$('#fkeys').innerHTML=navBtns.map((b,i)=>`<button type="button" data-go="${b.dataset.tab}">${i+1} ${b.dataset.mn}</button>`).join('');
+$('#cmdIn').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=e.target.value.trim().toUpperCase().replace(/\s*<?GO>?$/,'');const b=navBtns.find(b=>b.dataset.mn===v||b.children[0].textContent===v);if(b)go(b.dataset.tab);else{$('#crumb').textContent='Unknown command. Try: '+navBtns.map(b=>b.dataset.mn).join(' ');}e.target.select()});
+$('#cmdIn').addEventListener('focus',e=>e.target.select());
+function tick(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString('en-GB')+' CET'}tick();setInterval(tick,1000);
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(a){e.preventDefault();go(a.dataset.go)}});
+$('#bMenu').onclick=()=>$('#side').classList.toggle('open');
+let studied=LS.get('studied',{});
+function updMark(id){const on=!!studied[id];const m=$('#bMark');m.classList.toggle('on',on);m.textContent=on?'Studied ✓':'Mark as studied';$$('.done').forEach(d=>d.classList.toggle('on',!!studied[d.dataset.d]));const n=studyTabs.filter(t=>studied[t]).length;$('#ringTxt').textContent=n+' / 6';$('#ringArc').setAttribute('stroke-dasharray',(113.1*n/6)+' 113.1')}
+$('#bMark').onclick=()=>{const id=LS.get('tab','t61');studied[id]=!studied[id];LS.set('studied',studied);updMark(id)};
+
+/* ---------- step reveal ---------- */
+document.addEventListener('click',e=>{const s=e.target.closest('[data-step],[data-all]');if(!s)return;const ex=s.closest('.ex');const lis=[...ex.querySelectorAll('ol.steps li')];if(s.hasAttribute('data-all'))lis.forEach(l=>l.classList.add('show'));else{const nx=lis.find(l=>!l.classList.contains('show'));if(nx)nx.classList.add('show')}if(lis.every(l=>l.classList.contains('show')))ex.querySelector('[data-step]').textContent='Done ✓';tex(ex)});
+
+/* ---------- logging ---------- */
+function logAns(topic,ok,qtext){const L=LS.get('log',[]);L.push({t:topic,ok:ok?1:0,d:Date.now()});LS.set('log',L.slice(-3000));renderTape()}
+
+/* ---------- MCQ renderer ---------- */
+function mcq(q,opts={}){const box=document.createElement('div');box.className='mcq';const letters=['A','B','C'];
+  box.innerHTML=`<div class="tag">${opts.tag||TOPICS[q.topic]||''}</div><div class="stem">${q.q}</div><div class="opts">${q.o.map((o,i)=>`<button type="button" data-i="${i}"><b>${letters[i]}</b><span>${o}</span></button>`).join('')}</div><div class="why">${solHTML(q)}</div>`;
+  box.querySelectorAll('.opts button').forEach(b=>b.onclick=()=>{if(box.classList.contains('done'))return;const i=+b.dataset.i;
+    if(opts.deferred){box.querySelectorAll('.opts button').forEach(x=>x.style.outline='');b.style.outline='2px solid var(--blue)';opts.onPick&&opts.onPick(i);return}
+    reveal(box,q,i);opts.onAnswer&&opts.onAnswer(i===q.a)});
+  tex(box);return box}
+function reveal(box,q,i){box.classList.add('done');box.classList.toggle('wrong',i!==q.a);box.querySelectorAll('.opts button').forEach(x=>{const j=+x.dataset.i;if(j===q.a)x.classList.add('ok');else if(j===i)x.classList.add('ko')});tex(box)}
+
+function solHTML(q){if(!q.exp)return '';if(q.type!=='num')return q.exp;const F=q.fx&&FORM.find(f=>f[0]===q.fx);
+  const parts=q.exp.split(/;\s+|\.\s+(?=[A-Z(])/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);
+  return `<span class="solh">Step-by-step solution</span>${F?`<span class="fx" data-tex="${F[1].replace(/"/g,'&quot;')}"></span>`:''}<ol class="sol">${parts.map(x=>`<li${/^Trap/i.test(x)?' class="trap"':''}>${x}</li>`).join('')}</ol>`}
+
+/* ---------- original class questions ---------- */
+const CLASS=[
+ {topic:'basics',q:'An analyst finds that all the securities analyzed have estimated values higher than their market prices. The securities all appear to be:',o:['overvalued.','undervalued.','fairly valued.'],a:1,exp:'Intrinsic value > market price → the market undervalues them.'},
+ {topic:'basics',q:'An analyst finds that nearly all companies in a market segment have common shares which are trading at market prices above the analyst\'s estimate of the shares\' values. This market segment is widely followed by analysts. Which of the following statements describes the analyst\'s <i>most appropriate</i> first action?',o:['Issue a sell recommendation for each share issue.','Issue a buy recommendation for each share issue.','Reexamine the models and inputs used for the valuations.'],a:2,exp:'A widely followed segment is unlikely to be broadly mispriced; first check your own models and inputs.'},
+ {topic:'basics',q:'An analyst, using a number of models and a range of inputs, estimates a security\'s value to be between ¥250 and ¥270. The security is trading at ¥265. The security appears to be:',o:['overvalued.','undervalued.','fairly valued.'],a:2,exp:'The price lies inside the estimated range → fairly valued.'},
+ {topic:'basics',q:'An analyst is estimating the intrinsic value of a new company. The analyst has one year of financial statements for the company and has calculated the average values of a variety of price multiples for the industry in which the company operates. The analyst plans to use at least one model from each of the three categories of valuation models. The analyst is <i>least likely</i> to rely on the estimate(s) from the:',o:['multiplier model(s).','present value model(s).','asset-based valuation model(s).'],a:2,exp:'A new company is a going concern whose value lies in future growth; asset-based values work best for asset-heavy firms or liquidation, so they are the least reliable here. Industry multiples and forecasts are available.'},
+ {topic:'basics',q:'Based on a company\'s EPS of €1.35, an analyst estimates the intrinsic value of a security to be €16.60. Which type of model is the analyst <i>most likely</i> to be using to estimate intrinsic value?',o:['Multiplier model.','Present value model.','Asset-based valuation model.'],a:0,exp:'Value is a multiple of EPS: 16.60 / 1.35 ≈ 12.3× P/E.'},
+ {topic:'ddm',q:'An investor expects a share to pay dividends of $3.00 and $3.15 at the end of Years 1 and 2, respectively. At the end of the second year, the investor expects the shares to trade at $40.00. The required rate of return on the shares is 8 percent. If the investor\'s forecasts are accurate and the market price of the shares is currently $30, the <i>most likely</i> conclusion is that the shares are:',o:['overvalued.','undervalued.','fairly valued.'],a:1,exp:'V₀ = 3/1.08 + (3.15 + 40)/1.08² = 2.78 + 36.99 = $39.77 > $30 → undervalued.'},
+ {topic:'ddm',q:'Two investors with different holding periods but the same expectations and required rate of return for a company are estimating the intrinsic value of a common share of the company. The investor with the shorter holding period will <i>most likely</i> estimate a:',o:['lower intrinsic value.','higher intrinsic value.','similar intrinsic value.'],a:2,exp:'With the same expectations, the selling price embeds all later dividends, so the value is independent of the holding period.'},
+ {topic:'ddm',q:'An equity valuation model that focuses on expected dividends rather than the capacity to pay dividends is the:',o:['dividend discount model.','free cash flow to equity model.','cash flow return on investment model.'],a:0,exp:'DDM uses expected dividends; FCFE measures the capacity to pay.'}
+];
+CLASS.forEach(q=>q.src='class');
+CLASS.filter(q=>q.topic==='basics').forEach(q=>$('#t61q').appendChild(mcq(q,{tag:'Slide question',onAnswer:ok=>logAns(q.topic,ok)})));
+CLASS.filter(q=>q.topic==='ddm').forEach(q=>$('#t65q').appendChild(mcq(q,{tag:'CFA practice',onAnswer:ok=>logAns(q.topic,ok)})));
+
+/* ---------- theory bank ---------- */
+const TH=[
+ ['basics','Which statement about stakeholders and shareholders is correct?',['All stakeholders are shareholders.','All shareholders are stakeholders, but not all stakeholders are shareholders.','Shareholders and stakeholders are the same group.'],1,'Shareholders own shares; stakeholders include employees, suppliers, governments…'],
+ ['basics','Valuation in finance is best described as determining:',['the cost of an asset.','the current market price of an asset.','the theoretically correct (intrinsic) value of an asset.'],2,'Valuation estimates intrinsic or fair value, as opposed to cost or current market value.'],
+ ['basics','Comparable company analysis is a form of:',['intrinsic valuation.','relative valuation.','asset-based valuation.'],1,'Comps use ratios of similar public companies: relative valuation.'],
+ ['basics','Asset-based valuation models are most often used for:',['fast-growing technology firms.','capital-intensive businesses or liquidation scenarios.','companies with large brand value.'],1,'They rely on fair values of tangible assets and liabilities.'],
+ ['basics','If a security\'s estimated intrinsic value is lower than its market price, the security is:',['overvalued by the market.','undervalued by the market.','fairly valued.'],0,'Price above value → overvalued.'],
+ ['comps','Which multiple produces an enterprise value when applied to the target?',['P/E','EV/EBITDA','P/Book'],1,'EV multiples use pre-financing operating metrics and give EV.'],
+ ['comps','After applying EV/EBITDA to the target\'s EBITDA, the analyst obtains equity value by:',['adding net debt.','subtracting net debt.','dividing by the number of shares.'],1,'Equity = EV − net debt. Then divide by diluted shares for the price.'],
+ ['comps','Which pairing is a mismatch?',['EV/EBITDA × EBITDA','P/E × EPS','P/E × EBITDA'],2,'Never multiply EBITDA by a P/E.'],
+ ['comps','Why is the median often preferred to the mean of peer multiples?',['It always gives a higher value.','It is less sensitive to an extreme multiple.','It is required by IFRS.'],1,'The mean is pulled by outliers; the median is more robust.'],
+ ['comps','EBITDA is best described as:',['an operating earnings measure that ignores capex, working capital and taxes.','the free cash flow of the firm.','net income attributable to shareholders.'],0,'EBITDA is not a cash flow.'],
+ ['comps','A company trades at a lower EV/EBITDA than its peers. The <i>least likely</i> explanation is:',['slower expected growth.','higher operating or financial risk.','higher margins and lower capital needs.'],2,'Higher margins and lower capex would justify a higher multiple.'],
+ ['comps','EV/EBITDA implies €19.00 per share and forward P/E implies €16.80. The analyst should:',['conclude one multiple is wrong.','investigate differences in leverage, taxes, D&A, growth and accounting.','average the two and stop.'],1,'Different multiples rely on different measures; comps often give a range.'],
+ ['comps','The most judgment-intensive step in trading comps is usually:',['finding the right peer companies.','dividing EV by EBITDA.','subtracting net debt.'],0,'Peer selection: industry, geography, size, growth, profitability.'],
+ ['comps','Market prices and financial metrics in a comps table should:',['come from any available date.','be dated and defined consistently.','always be forward estimates.'],1,'Prices refer to a date; metrics to a period: keep them consistent.'],
+ ['asset','Under the IAS 16 cost model, an increase in the market value of land:',['increases its carrying amount.','generally does not increase its carrying amount.','is recognised in profit immediately.'],1,'Cost model: cost less accumulated depreciation and impairment.'],
+ ['asset','According to IAS 16.29, the cost or revaluation model is chosen:',['separately for each asset.','for an entire class of assets.','by the auditor.'],1,'The policy applies to an entire asset class.'],
+ ['asset','A limitation of asset-based valuation is that:',['it cannot be used for real-estate companies.','brands, customer relationships and future growth may not be captured.','it ignores liabilities.'],1,'Intangibles and growth are hard to capture.'],
+ ['asset','In asset-based valuation, liabilities are subtracted from assets because:',['creditors have claims on the assets; shareholders get the remainder.','liabilities are always overstated.','accounting rules require it.'],0,'Equity is the residual claim.'],
+ ['dist','On the ex-dividend date:',['new buyers no longer receive the upcoming dividend.','the cash dividend is paid.','the company announces the dividend.'],0,'Declaration → ex-dividend → record → payment.'],
+ ['dist','After a proportional stock dividend, a shareholder\'s percentage ownership:',['increases.','decreases.','stays the same.'],2,'100/1,000 = 110/1,100 = 10%.'],
+ ['dist','In a flexible dividend, the key difference between electing company cash and selling rights on the market is:',['the tax rate only.','who pays the cash: the company or another investor.','the number of rights received.'],1,'Option A: company pays; option B: the buyer of the rights pays.'],
+ ['dist','A share premium repayment is classified as:',['an ordinary cash dividend.','a return of contributed equity.','a stock dividend.'],1,'Cash comes from the share premium reserve, not ordinary profit.'],
+ ['dist','A nominal (capital) reduction from €10 to €8 per share:',['reduces the number of shares.','returns cash while keeping shares and ownership % unchanged.','is a stock dividend.'],1,'Cash returned = (10 − 8) × shares.'],
+ ['dist','The standard DDM discounts:',['all distributions including share premium repayments.','expected cash dividends per share.','additional shares received in stock dividends.'],1,'Stock dividend shares are not a cash flow; returns of capital are treated separately.'],
+ ['dist','A free allocation right (derecho de asignación gratuita) is:',['an extra share.','a temporary entitlement that can be used toward new shares or sold.','a bond.'],1,'A set number of rights is needed for one new share.'],
+ ['ddm','Beta measures:',['the stock\'s total volatility.','the stock\'s sensitivity to market returns.','the firm\'s dividend growth.'],1,'Beta is systematic (market) risk.'],
+ ['ddm','Different data vendors report different betas for the same stock because:',['one of them must be wrong.','beta is an estimate that depends on period, frequency, index and adjustments.','beta is observed directly in the market.'],1,'Beta cannot be directly observed.'],
+ ['ddm','The Gordon growth model requires that:',['g > k.','g < k.','dividends are zero.'],1,'Otherwise the formula gives a negative or infinite value.'],
+ ['ddm','The Gordon model is <i>least</i> suitable for a company that:',['is mature with stable dividend growth.','pays no dividend and is entering its growth phase.','has constant required return.'],1,'Use a multistage model or a delayed-dividend approach.'],
+ ['ddm','A three-stage DDM is typically used for:',['mature utilities.','young firms going through growth, transition and maturity.','companies in liquidation.'],1,'Growth → transition → maturity.'],
+ ['ddm','In the multi-year holding period DDM, dividends:',['must grow at a constant rate.','can each be forecast separately.','are ignored; only the selling price matters.'],1,'Constant growth is not required.'],
+ ['ddm','With g = b × ROE, an increase in the payout ratio (other things equal):',['raises g.','lowers g.','leaves g unchanged.'],1,'Higher payout → lower retention b → lower g.'],
+ ['port','Variance as a measure of risk captures:',['the expected return.','the dispersion of returns around the mean.','the correlation with the market.'],1,'Higher variance = more dispersion = more risk.'],
+ ['port','Why does an equal-weight portfolio of the Dow 30 have lower σ than the average stock?',['Because its average return is lower.','Because the stocks are not perfectly correlated, so fluctuations partly cancel.','Because of rebalancing costs.'],1,'Portfolio variance depends on covariances.'],
+ ['port','With two assets and ρ = +1 (positive weights), portfolio σ equals:',['zero.','the weighted average of the two σ.','less than the weighted average.'],1,'σp = w₁s₁ + w₂s₂: no diversification benefit.'],
+ ['port','Holding all else constant, increasing correlation between two stocks makes the portfolio:',['less volatile.','more volatile.','equally volatile.'],1,'Higher ρ → higher σp.'],
+ ['port','As the number of assets N grows, portfolio risk is dominated by:',['individual variance terms.','covariance terms.','expected returns.'],1,'N variance terms vs N(N−1) covariance terms.'],
+ ['port','The Markowitz efficient frontier is:',['the whole minimum-variance frontier.','the part of the minimum-variance frontier above the global minimum-variance portfolio.','the line from the risk-free rate.'],1,'Points below the GMV are dominated.'],
+ ['port','Diversification cannot remove:',['firm-specific risk.','systematic (market) risk.','idiosyncratic risk.'],1,'Market-wide shocks hit all holdings at once.'],
+ ['port','A product recall at one company is an example of:',['systematic risk.','unsystematic (firm-specific) risk.','interest-rate risk.'],1,'It need not affect other stocks.'],
+ ['port','If average pairwise correlation rises, the risk floor of a well-diversified portfolio:',['falls.','rises.','does not change.'],1,'Floor σ = σ√ρ.'],
+ ['port','Converting annual figures to daily (252 days):',['both E(R) and σ are divided by 252.','E(R) is divided by 252 and σ by √252.','neither changes.'],1,'Variance scales with time, so σ scales with √time.'],
+ ['port','When moving from annual to daily data, the tangency portfolio weights:',['change.','stay the same.','become equal.'],1,'Only the units and slopes change.'],
+ ['port','The diversification ratio is:',['portfolio σ ÷ weighted average of individual σ.','weighted average of individual σ ÷ portfolio σ.','number of assets ÷ correlation.'],1,'Conventional diversification ratio (≥ 1 when diversification helps).'],
+ ['port','When deciding whether to add a stock to a portfolio, what matters most is:',['its standalone volatility.','its correlation/covariance with the assets already held.','last year\'s return.'],1,'The relevant question is how it changes the risk of the whole portfolio.']
+].map(t=>({topic:t[0],q:t[1],o:t[2],a:t[3],exp:t[4],type:'th'}));
+
+/* ---------- numerical generators ---------- */
+function opts3(correct,wrongs,fmt){const w=[...new Set(wrongs.map(fmt))].filter(x=>x!==fmt(correct));const mul=[.89,1.13,.8,1.25,.7,1.4];let mi=0;while(w.length<2&&mi<mul.length){const c=fmt(correct*mul[mi++]);if(c!==fmt(correct)&&!w.includes(c))w.push(c)}const arr=shuffle([fmt(correct),w[0],w[1]]);return{o:arr,a:arr.indexOf(fmt(correct))}}
+const eur=x=>'€'+f2(x), usd=x=>'$'+f2(x);
+const GEN=[
+ ['comps',()=>{const e=R(30,120,5),m=R(6,13,.5),nd=R(40,300,10),sh=R(10,60,5);const ev=e*m,eq=ev-nd,p=eq/sh;const o=opts3(p,[ev/sh,(ev+nd)/sh],eur);return{q:`Target: EBITDA €${e}m · peer median EV/EBITDA ${m.toFixed(1)}× · net debt €${nd}m · diluted shares ${sh}m. The implied price per share is <i>closest</i> to:`,...o,exp:`EV = ${m}×${e} = €${f1(ev)}m; equity = ${f1(ev)} − ${nd} = €${f1(eq)}m; price = ${f1(eq)}/${sh} = ${eur(p)}. Trap: forgetting to subtract net debt (${eur(ev/sh)}).`}}],
+ ['comps',()=>{const e=R(40,150,5),m=R(7,12,.5),d=R(100,400,10),c=R(20,90,5),sh=R(20,80,5);const nd=d-c,eq=e*m-nd,p=eq/sh;const o=opts3(p,[(e*m-d)/sh,(e*m-d-c)/sh],eur);return{q:`Use EV/EBITDA = ${m.toFixed(1)}×. Target company: annual EBITDA = €${e}m; gross debt = €${d}m; excess cash = €${c}m; shares outstanding = ${sh}m. The implied price per share is:`,...o,exp:`Net debt = ${d} − ${c} = ${nd}; EV = ${f1(e*m)}; equity = ${f1(eq)}; price = ${eur(p)}. Cash is subtracted from debt, not added.`}}],
+ ['comps',()=>{const a=R(10,14,1),b=a+R(1,3,1),c=b+R(1,3,1),eps=R(0.8,3.5,.05);const med=b,mean=(a+b+c)/3;const o=opts3(med*eps,[mean*eps+0.3,eps*c],eur);return{q:`Peers trade at forward P/E of ${a}×, ${b}× and ${c}×. Target expected EPS next year = €${eps.toFixed(2)}. Using the median peer P/E, the implied share price is:`,...o,exp:`Median = ${b}×; price = ${b} × ${eps.toFixed(2)} = ${eur(med*eps)}. P/E gives the price directly (no net-debt step).`}}],
+ ['comps',()=>{const a=R(7,9,.5),b=R(9,11,.5),c=R(11,12.5,.5),out=R(25,40,1);const arr=[a,b,c,out].sort((x,y)=>x-y);const med=(arr[1]+arr[2])/2,mean=arr.reduce((s,x)=>s+x,0)/4;const o=opts3(med,[mean,arr[1]],x=>x.toFixed(2)+'×');return{q:`Four peers have EV/EBITDA of ${a}×, ${b}×, ${c}× and ${out}× (the last one has an unusual one-off loss). The median multiple is:`,...o,exp:`Sorted: ${arr.join(', ')}. Median = (${arr[1]} + ${arr[2]})/2 = ${med.toFixed(2)}×; mean = ${mean.toFixed(2)}× is pulled up by the outlier.`}}],
+ ['comps',()=>{const sh=R(1,10,1),pr=R(8,40,1),d=R(2,20,1),c=R(1,8,1);const ev=sh*pr+d-c;const o=opts3(ev,[sh*pr+d+c,sh*pr-d+c],x=>'€'+f1(x)+'m');return{q:`A listed peer has ${sh} million shares at €${pr}, interest-bearing debt of €${d}m and cash of €${c}m. Its enterprise value is:`,...o,exp:`EV = ${sh*pr} + ${d} − ${c} = €${f1(ev)}m.`}}],
+ ['comps',()=>{const ev=R(400,2000,50),eb=R(50,200,10);const m=ev/eb;const o=opts3(m,[eb/ev*100,ev/eb*1.2],x=>x.toFixed(1)+'×');return{q:`A company has enterprise value of €${ev}m and annual EBITDA of €${eb}m. Its EV/EBITDA multiple is:`,...o,exp:`${ev}/${eb} = ${m.toFixed(1)}×: the market pays €${m.toFixed(1)} per €1 of EBITDA.`}}],
+ ['asset',()=>{const L=R(2,6,.5),M=R(1,4,.5),I=R(.5,2,.5),C=R(.2,1,.1),dl=R(-1,2,.5),dm=R(-1,0,.5),liab=R(1.5,4,.5),sh=R(1,4,1);const book=L+M+I+C-liab,nav=book+dl+dm;const o=opts3(nav/sh,[book/sh,(L+M+I+C+dl+dm)/sh],eur);return{q:`Book values (€m): land and buildings ${L}, machinery ${M}, inventory ${I}, cash ${C}; total liabilities ${liab}. Land is worth ${dl>=0?dl+' more':(-dl)+' less'} than book and machinery ${dm===0?'equal to':(-dm)+' less than'} book. With ${sh}m shares, the adjusted NAV per share is:`,...o,exp:`Book equity = ${f2(book)}; adjustments ${dl>=0?'+':''}${dl} and ${dm}; NAV = ${f2(nav)}m ÷ ${sh}m = ${eur(nav/sh)}.`}}],
+ ['asset',()=>{const eq=R(3,8,.5),up=R(.5,2,.5);const o=opts3(eq+up,[eq,eq-up],x=>'€'+f2(x)+'m');return{q:`A company uses the IAS 16 cost model. Reported equity is €${eq}m. The analyst estimates its land is worth €${up}m more than its carrying amount; other items are at fair value. Adjusted NAV is:`,...o,exp:`Cost model does not record the rise, so the analyst adds it: ${eq} + ${up} = €${f2(eq+up)}m. Under the revaluation model no adjustment would be needed.`}}],
+ ['dist',()=>{const ni=R(50,400,10),pay=R(.2,.7,.05);const d=ni*pay;const o=opts3(1-pay,[pay,d/ni/2],x=>pc(x,0));return{q:`Net income is €${ni}m and cash dividends are €${f1(d)}m. The earnings retention rate b is:`,...o,exp:`Payout = ${f1(d)}/${ni} = ${pc(pay,0)}; b = 1 − payout = ${pc(1-pay,0)}.`}}],
+ ['dist',()=>{const p=R(10,60,.5),d=R(.3,3,.1);const o=opts3(p-d,[p,p+d],eur);return{q:`A share trades at €${p.toFixed(2)} before a €${d.toFixed(2)} cash dividend. All else equal, its theoretical price on the ex-dividend date is:`,...o,exp:`Cash leaves the company: ${p.toFixed(2)} − ${d.toFixed(2)} = ${eur(p-d)}. Wealth is unchanged.`}}],
+ ['dist',()=>{const p=R(10,50,1),s=pick([.05,.1,.2,.25]);const o=opts3(p/(1+s),[p*(1-s),p],eur);return{q:`A share trades at €${p} before a ${pc(s,0)} stock dividend. Its theoretical price after the stock dividend is:`,...o,exp:`P ÷ (1 + s) = ${p}/${1+s} = ${eur(p/(1+s))}. Trap: P × (1 − s).`}}],
+ ['dist',()=>{const r=pick([25,40,50,73,80]),k=R(2,12,1),n=r*k,c=R(.15,.6,.001);const o=opts3(k,[n/(r+1),k+1],x=>Math.round(x)+' new shares');return{q:`Under a flexible dividend, each share receives one free allocation right and ${r} rights are needed for one new share. An investor holding ${n} shares who elects new shares receives:`,...o,exp:`${n} rights ÷ ${r} = ${k} new shares (afterwards ${n+k} shares).`}}],
+ ['dist',()=>{const n=R(100,2000,10),c=R(.15,.6,.001);const o=opts3(n*c,[n*c*1.21,n*c/1.1],eur);return{q:`A flexible dividend offers a cash alternative of €${c.toFixed(3)} gross per share. An investor with ${n} shares who elects company cash receives:`,...o,exp:`${n} × €${c.toFixed(3)} = ${eur(n*c)} gross, paid by the company.`}}],
+ ['dist',()=>{const a=R(5,20,1),b=a-R(1,4,1),sh=R(1,10,1);const o=opts3((a-b)*sh,[b*sh,a*sh],x=>'€'+f1(x)+'m');return{q:`A company reduces the nominal value of its ${sh} million shares from €${a} to €${b}. Cash returned to shareholders is:`,...o,exp:`(${a} − ${b}) × ${sh}m = €${(a-b)*sh}m. Shares and ownership % unchanged.`}}],
+ ['ddm',()=>{const rf=R(2,6,.5),rm=rf+R(4,7,.5),b=R(.6,1.6,.1);const k=rf+b*(rm-rf);const o=opts3(k/100,[(rf+b*rm)/100,(b*(rm-rf))/100],x=>pc(x,2));return{q:`Risk-free rate ${rf}%, expected market return ${rm}%, beta ${b.toFixed(1)}. The cost of equity from CAPM is:`,...o,exp:`k = ${rf} + ${b.toFixed(1)}(${rm} − ${rf}) = ${k.toFixed(2)}%.`}}],
+ ['ddm',()=>{const D0=R(1,5,.25),g=R(.03,.2,.01),rf=R(3,6,.5),rm=rf+R(4,6,.5),b=R(.8,1.5,.1),P1=R(15,60,.1);const k=(rf+b*(rm-rf))/100,D1=D0*(1+g),V=(D1+P1)/(1+k);const o=opts3(V,[(D0+P1)/(1+k),(D1+P1)/(1+rm/100)],usd);return{q:`Current dividend D₀ = $${D0.toFixed(2)}; expected growth for the year ${pc(g,0)}; risk-free ${rf}%; market return ${rm}%; beta ${b.toFixed(1)}. The stock is expected to sell for $${P1.toFixed(2)} at year-end. One-period DDM value:`,...o,exp:`D₁ = ${f2(D1)}; k = ${pc(k)}; V = (${f2(D1)} + ${P1.toFixed(2)})/${(1+k).toFixed(4)} = ${usd(V)}. Trap: using D₀ instead of D₁.`}}],
+ ['ddm',()=>{const D0=R(.5,3,.1),g=R(.03,.1,.01),k=R(.09,.16,.001),P2=R(10,50,.1);const D1=D0*(1+g),D2=D1*(1+g),V=D1/(1+k)+(D2+P2)/(1+k)**2;const o=opts3(V,[(D1+D2+P2)/(1+k)**2,D0/(1+k)+(D0+P2)/(1+k)**2],usd);return{q:`A stock currently pays a dividend of $${D0.toFixed(2)}, has an expected growth rate of ${pc(g,0)}, and has a required rate of return of ${pc(k,1)}. Calculate the value of the stock today if we expect to sell it for $${P2.toFixed(2)} in two years.`,...o,exp:`D₁ = ${f2(D1)}, D₂ = ${f2(D2)}; V = ${f2(D1)}/${(1+k).toFixed(3)} + (${f2(D2)} + ${P2.toFixed(2)})/${(1+k).toFixed(3)}² = ${usd(V)}.`}}],
+ ['ddm',()=>{const d1=R(1,3,.25),d2=d1+R(.25,.75,.25),d3=d2+R(.25,.75,.25),P=R(30,80,5),r=R(.08,.13,.01);const V=d1/(1+r)+d2/(1+r)**2+(d3+P)/(1+r)**3;const o=opts3(V,[(d1+d2+d3+P)/(1+r)**3,d1/(1+r)+d2/(1+r)**2+d3/(1+r)**3+P/(1+r)**2],eur);return{q:`Expected dividends: €${d1.toFixed(2)}, €${d2.toFixed(2)} and €${d3.toFixed(2)} in years 1–3; expected selling price €${P} at the end of year 3; required return ${pc(r,0)}. Value today:`,...o,exp:`P₀ = ${d1}/${1+r} + ${d2}/${(1+r).toFixed(2)}² + (${d3} + ${P})/${(1+r).toFixed(2)}³ = ${eur(V)}.`}}],
+ ['ddm',()=>{const D0=R(1,4,.05),g=R(.02,.07,.005),k=g+R(.03,.08,.005);const V=D0*(1+g)/(k-g);const o=opts3(V,[D0/(k-g),D0*(1+g)/k],usd);return{q:`A company just paid a dividend of $${D0.toFixed(2)}. Dividends are expected to grow at ${pc(g,1)} forever and the required return is ${pc(k,1)}. Gordon growth value:`,...o,exp:`D₁ = ${f2(D0*(1+g))}; V = D₁/(k − g) = ${f2(D0*(1+g))}/${(k-g).toFixed(3)} = ${usd(V)}. Trap: using D₀.`}}],
+ ['ddm',()=>{const eps=R(2,6,.05),D0=+(eps*R(.3,.6,.05)).toFixed(2),roe=R(.12,.22,.01),k=R(.14,.2,.01);const b=1-D0/eps,g=b*roe;if(g>=k-.01)return null;const V=D0*(1+g)/(k-g);const o=opts3(V,[D0/(k-g),D0*(1+roe)/(k-roe+.2)],usd);return{q:`Recent dividend per share $${D0.toFixed(2)}; EPS $${eps.toFixed(2)}; ROE ${pc(roe,0)}; required return ${pc(k,0)}. Using g = b × ROE and the Gordon growth model, intrinsic value is:`,...o,exp:`b = 1 − ${D0.toFixed(2)}/${eps.toFixed(2)} = ${b.toFixed(4)}; g = ${pc(g)}; D₁ = ${f2(D0*(1+g))}; V = ${usd(V)}.`}}],
+ ['ddm',()=>{const eps=R(2,6,.05),D0=+(eps*R(.3,.6,.05)).toFixed(2),roe=R(.12,.22,.01),k=R(.15,.22,.01);const g=(1-D0/eps)*roe;if(g>=k-.01)return null;const V=D0*(1+g)/(k-g),nog=D0/k;const o=opts3(V-nog,[V,nog],usd);return{q:`Recent DPS $${D0.toFixed(2)}, EPS $${eps.toFixed(2)}, ROE ${pc(roe,0)}, required return ${pc(k,0)}. How much does the dividend growth assumption add to the Gordon intrinsic value?`,...o,exp:`With growth: ${usd(V)}. Without growth: D₀/k = ${usd(nog)}. Growth adds ${usd(V-nog)}.`}}],
+ ['ddm',()=>{const D0=R(1,3,.05),g=R(.03,.06,.005),k=g+R(.04,.07,.005);const V=D0*(1+g)/(k-g);const P=+(V*pick([.75,.85,1.2,1.35])).toFixed(2);const ans=P<V?'undervalued':'overvalued';const arr=['undervalued','fairly valued','overvalued'];return{q:`D₀ = $${D0.toFixed(2)}, constant growth ${pc(g,1)}, required return ${pc(k,1)}. The share trades at $${P.toFixed(2)}. Based on the Gordon model the share is:`,o:arr,a:arr.indexOf(ans),exp:`V = ${usd(V)} vs price $${P.toFixed(2)} → ${ans}.`}}],
+ ['ddm',()=>{const D0=R(1,2.5,.01),g1=R(.15,.25,.01),n1=R(2,3,1),g2=R(.08,.14,.01),n2=R(1,2,1),gL=R(.03,.06,.01),k=R(.1,.13,.01);let d=D0,pv=0;const ds=[];for(let t=1;t<=n1+n2;t++){d*=1+(t<=n1?g1:g2);ds.push(d);pv+=d/(1+k)**t}const N=n1+n2,P=d*(1+gL)/(k-gL),V=pv+P/(1+k)**N;const o=opts3(V,[pv+P/(1+k)**(N+1),pv+d/(k-gL)/(1+k)**N],usd);return{q:`A company is expected to experience a dividend growth rate of ${pc(g1,0)} for the next ${n1} years, ${pc(g2,0)} for the subsequent ${n2} year${n2>1?'s':''}, and a constant growth rate of ${pc(gL,0)} thereafter. The last dividend paid was $${D0.toFixed(2)} per share, and its cost of equity is ${pc(k,0)}. Value of the stock:`,...o,exp:`Dividends: ${ds.map(f2).join(', ')}. P${N} = D${N+1}/(k − g) = ${f2(P)}. PV of dividends ${f2(pv)} + PV of P${N} ${f2(P/(1+k)**N)} = ${usd(V)}. Traps: discounting P one year too far, or forgetting ×(1+g).`}}],
+ ['ddm',()=>{const n=R(2,5,1),E=R(2,5,.05),po=R(.3,.6,.05),g=R(.03,.06,.01),k=R(.09,.13,.01);const D=E*po,P=D/(k-g),V=P/(1+k)**n;const o=opts3(V,[P/(1+k)**(n+1),E/(k-g)/(1+k)**n],usd);return{q:`A firm is expected to have ${n} years of extraordinary growth during which no dividends will be paid. Beginning in Year ${n+1}, earnings will grow at a sustainable ${pc(g,0)} rate indefinitely, and the firm will pay out ${pc(po,0)} of its earnings. Earnings in Year ${n+1} are expected to be $${E.toFixed(2)} per share and the required return is ${pc(k,0)}. Value today:`,...o,exp:`D${n+1} = ${f2(D)}; P${n} = ${f2(D)}/(${k} − ${g}) = ${f2(P)}; V₀ = ${f2(P)}/${(1+k).toFixed(2)}^${n} = ${usd(V)}.`}}],
+ ['ddm',()=>{const P=R(20,60,1),D1=R(1,3,.1),g=R(.03,.07,.005);const k=D1/P+g;const o=opts3(k,[D1/P,(D1/(1+g))/P+g],x=>pc(x,2));return{q:`A share trades at $${P}, the expected dividend next year is $${D1.toFixed(2)} and dividends grow at ${pc(g,1)} forever. The market-implied required return is:`,...o,exp:`From Gordon: k = D₁/P₀ + g = ${pc(D1/P)} + ${pc(g,1)} = ${pc(k)}.`}}],
+ ['port',()=>{const w1=R(.2,.8,.05),e1=R(4,10,.5),e2=R(8,18,.5);const er=w1*e1+(1-w1)*e2;const o=opts3(er/100,[(e1+e2)/200,(w1*e2+(1-w1)*e1)/100],x=>pc(x,2));return{q:`A portfolio holds ${pc(w1,0)} in asset A (expected return ${e1}%) and the rest in asset B (expected return ${e2}%). The portfolio expected return is:`,...o,exp:`${w1}×${e1} + ${(1-w1).toFixed(2)}×${e2} = ${er.toFixed(2)}%.`}}],
+ ['port',()=>{const w=R(.3,.8,.05),s1=R(8,20,1),s2=R(15,35,1),rho=R(-.5,.6,.05);const v=w*w*s1*s1+(1-w)**2*s2*s2+2*w*(1-w)*rho*s1*s2,s=Math.sqrt(v);const o=opts3(s,[w*s1+(1-w)*s2,Math.sqrt(w*w*s1*s1+(1-w)**2*s2*s2+w*(1-w)*rho*s1*s2)],x=>x.toFixed(2)+'%');return{q:`Weights ${pc(w,0)} in A and ${pc(1-w,0)} in B. σ<sub>A</sub> = ${s1}%, σ<sub>B</sub> = ${s2}%, ρ<sub>AB</sub> = ${rho.toFixed(2)}. The portfolio standard deviation is:`,...o,exp:`σp = √(${w}²·${s1}² + ${(1-w).toFixed(2)}²·${s2}² + 2·${w}·${(1-w).toFixed(2)}·${rho.toFixed(2)}·${s1}·${s2}) = ${s.toFixed(2)}%. Trap: weighted average of σ (only valid when ρ = +1).`}}],
+ ['port',()=>{const s1=R(8,20,1),s2=R(15,40,1);const w=s2/(s1+s2);const o=opts3(w,[s1/(s1+s2),.5],x=>pc(x,1));return{q:`Two assets have σ<sub>A</sub> = ${s1}% and σ<sub>B</sub> = ${s2}% with perfect negative correlation (ρ = −1). The weight in A that gives a zero-risk portfolio is:`,...o,exp:`σp = |w s_A − (1−w) s_B| = 0 → w = s_B/(s_A + s_B) = ${s2}/${s1+s2} = ${pc(w,1)}.`}}],
+ ['port',()=>{const w=R(.3,.7,.1),s1=R(10,20,1),s2=R(20,30,1);const s=w*s1+(1-w)*s2;const o=opts3(s,[Math.sqrt(w*w*s1*s1+(1-w)**2*s2*s2),Math.abs(w*s1-(1-w)*s2)],x=>x.toFixed(2)+'%');return{q:`With ρ = +1, weights ${pc(w,0)}/${pc(1-w,0)}, σ<sub>A</sub> = ${s1}% and σ<sub>B</sub> = ${s2}%, the portfolio σ is:`,...o,exp:`ρ = +1: σp = w₁s₁ + w₂s₂ = ${s.toFixed(2)}%.`}}],
+ ['port',()=>{const s1=R(10,30,1),s2=R(10,30,1),rho=R(-.6,.9,.05);if(Math.abs(rho)<.06)return null;const cov=rho*s1*s2/10000;const o=opts3(rho,[cov*100,rho*1.5>1?rho/2:rho*1.5],x=>x.toFixed(2));return{q:`The covariance between the returns of two assets is ${cov.toFixed(4)}. Their standard deviations are ${s1}% and ${s2}%. The correlation coefficient is:`,...o,exp:`ρ = Cov/(s₁s₂) = ${cov.toFixed(4)}/(${s1/100}×${s2/100}) = ${rho.toFixed(2)}.`}}],
+ ['port',()=>{const r=[R(-10,25,1),R(-10,25,1),R(-10,25,1),R(-10,25,1)];const m=r.reduce((a,b)=>a+b,0)/4,v=r.reduce((a,b)=>a+(b-m)**2,0)/3;const s=Math.sqrt(v);const o=opts3(s,[Math.sqrt(v*3/4),v/10],x=>x.toFixed(2)+'%');return{q:`Annual returns over four years were ${r.join('%, ')}%. The sample standard deviation is:`,...o,exp:`Mean = ${m.toFixed(2)}%; s² = Σ(R − R̄)²/(K − 1) = ${v.toFixed(2)}; s = ${s.toFixed(2)}%. Trap: dividing by K instead of K − 1.`}}],
+ ['port',()=>{const s=R(10,40,1),e=R(5,15,.5);const sd=s/Math.sqrt(252);const o=opts3(sd,[s/252,s/Math.sqrt(12)],x=>x.toFixed(3)+'%');return{q:`A portfolio has annual expected return ${e}% and annual volatility ${s}%. Assuming 252 trading days and independent daily returns, daily volatility is approximately:`,...o,exp:`σd = σa/√252 = ${s}/15.87 = ${sd.toFixed(3)}% (expected return would be ${e}/252 = ${(e/252).toFixed(4)}%).`}}],
+ ['port',()=>{const e=R(6,14,.1),rf=R(1,4,.25),s=R(8,20,.1);const sh=(e-rf)/s;const o=opts3(sh,[e/s,(e-rf)/(s*s)*10],x=>x.toFixed(3));return{q:`Portfolio expected return ${e.toFixed(1)}%, volatility ${s.toFixed(1)}%, risk-free rate ${rf}%. The Sharpe ratio is:`,...o,exp:`(${e.toFixed(1)} − ${rf})/${s.toFixed(1)} = ${sh.toFixed(3)}.`}}],
+ ['port',()=>{const N=R(2,40,1),s=R(15,40,1),rho=R(.1,.5,.05);const v=s*s/N+(1-1/N)*rho*s*s;const o=opts3(Math.sqrt(v),[s/Math.sqrt(N),s*Math.sqrt(rho)],x=>x.toFixed(2)+'%');return{q:`An equally weighted portfolio holds ${N} stocks, each with σ = ${s}%, and average pairwise correlation ${rho.toFixed(2)}. Portfolio σ is:`,...o,exp:`σp² = σ²/N + (1 − 1/N)ρσ² = ${v.toFixed(1)} → σp = ${Math.sqrt(v).toFixed(2)}%. The floor as N → ∞ is σ√ρ = ${(s*Math.sqrt(rho)).toFixed(2)}%.`}}],
+ ['port',()=>{const w=R(.3,.7,.1),s1=R(10,20,1),s2=R(20,35,1),rho=R(0,.5,.1);const sp=Math.sqrt(w*w*s1*s1+(1-w)**2*s2*s2+2*w*(1-w)*rho*s1*s2),avg=w*s1+(1-w)*s2;const o=opts3(avg/sp,[sp/avg,avg],x=>x.toFixed(3));return{q:`Weights ${pc(w,0)}/${pc(1-w,0)}, σ ${s1}% and ${s2}%, ρ = ${rho.toFixed(1)}. Portfolio σ is ${sp.toFixed(2)}%. The conventional diversification ratio is:`,...o,exp:`Weighted average σ = ${avg.toFixed(2)}%; ratio = ${avg.toFixed(2)}/${sp.toFixed(2)} = ${(avg/sp).toFixed(3)}.`}}],
+ ['dist',()=>{const n=R(1,20,1),nom=R(1,5,1),ip=nom+R(1,10,1);const cap=n*nom,pr=n*(ip-nom);const o=opts3(pr,[n*ip,cap],x=>'€'+f1(x)+'m');return{q:`A company issues ${n} million new shares with a nominal value of €${nom} at an issue price of €${ip}. The amount credited to share premium is:`,...o,exp:`Share capital = ${n} × ${nom} = €${cap}m; share premium = ${n} × (${ip} − ${nom}) = €${f1(pr)}m. Repaying share premium later is not an ordinary dividend.`}}],
+ ['dist',()=>{const r=pick([25,40,50,73]),k=R(2,12,1),n=r*k,pr=R(.15,.6,.001),c=+(pr*R(1.02,1.08,.01)).toFixed(3);const o=opts3(n*pr,[n*c,k*pr*r/2],eur);return{q:`Flexible dividend: company cash offer €${c.toFixed(3)} per right; rights trade on the market at €${pr.toFixed(3)}; ${r} rights per new share. An investor with ${n} shares who sells all the rights on the market receives:`,...o,exp:`Rights = ${n} × 1 = ${n}; proceeds = ${n} × €${pr.toFixed(3)} = ${eur(n*pr)} (option B). Option A would pay ${eur(n*c)}; option C gives ${k} new shares.`}}],
+ ['port',()=>{const w=R(.2,.8,.1),s1=R(10,25,1),s2=R(15,35,1),rho=R(-.5,.8,.1);const v=w*w*s1*s1+(1-w)**2*s2*s2+2*w*(1-w)*rho*s1*s2;const o=opts3(v,[w*w*s1*s1+(1-w)**2*s2*s2,w*w*s1*s1+(1-w)**2*s2*s2+w*(1-w)*rho*s1*s2],x=>f1(x)+' (%²)');return{q:`Weights ${pc(w,0)} in asset 1 and ${pc(1-w,0)} in asset 2; s₁ = ${s1}%, s₂ = ${s2}%, ρ₁,₂ = ${rho.toFixed(1)}. Var(R<sub>p</sub>) in %² is:`,...o,exp:`w₁²s₁² = ${f1(w*w*s1*s1)}; w₂²s₂² = ${f1((1-w)**2*s2*s2)}; 2w₁w₂ρs₁s₂ = ${f1(2*w*(1-w)*rho*s1*s2)}; Var = ${f1(v)} → std = ${Math.sqrt(v).toFixed(2)}%. Trap: forgetting the 2 in the covariance term.`}}],
+ ['dist',()=>{const p=R(10,50,1),s=pick([.05,.1,.2]),n=pick([100,200,500,1000]);const pa=p/(1+s);const o=opts3(n*(1+s),[n,n*(1+s)+1],x=>Math.round(x)+' shares');return{q:`You own ${n} shares priced at €${p}. The company pays a ${pc(s,0)} stock dividend. After the payment you hold how many shares (each worth about €${f2(pa)})?`,...o,exp:`New shares = ${n} × ${s} = ${n*s}; total ${n*(1+s)}; ${n*(1+s)} × €${f2(pa)} ≈ €${f2(n*p)} = ${n} × €${p}. Wealth and ownership % unchanged.`}}]
+];
+const GFX=['Price from EV multiple','Price from EV multiple','Price from P/E','Mean vs median multiple','Enterprise value','EV/EBITDA',
+ 'Adjusted NAV per share','Adjusted NAV per share',
+ 'Payout and retention','Ex-dividend price','Price after stock dividend','Scrip: new shares','Flexible dividend: three options','Capital reduction cash',
+ 'CAPM','One-period DDM','Multi-year DDM','Multi-year DDM','Gordon growth','Sustainable growth','No-growth value','Gordon growth','Terminal value (multistage)','Terminal value (multistage)','Implied required return',
+ 'Portfolio expected return','Two-asset σ','ρ = −1','ρ = +1','Correlation','Sample variance','Annual → daily','Sharpe ratio','Equal-weight N assets','Diversification ratio',
+ 'Share capital and premium','Flexible dividend: three options','Two-asset variance','Stock dividend: wealth unchanged'];
+if(GFX.length!==GEN.length)console.warn('GFX/GEN length mismatch',GFX.length,GEN.length);
+GEN.forEach((g,i)=>g[2]=GFX[i]||'');
+function topicAcc(t){const A=LS.get('log',[]).filter(x=>x.t===t);return (A.filter(x=>x.ok).length+1)/(A.length+2)}
+function adaptiveQ(sel,type){const ks=Object.keys(TOPICS).filter(k=>inSel(sel,k));if(ks.length<2)return genQ(sel,type);const w=ks.map(k=>.4+2*(1-topicAcc(k)));let x=Math.random()*w.reduce((a,b)=>a+b,0),k=ks[ks.length-1];for(let i=0;i<ks.length;i++){x-=w[i];if(x<=0){k=ks[i];break}}return genQ(k,type)||genQ(sel,type)}
+function genQ(topic,type){for(let k=0;k<50;k++){let pool=[];if(type!=='th')pool=pool.concat(GEN.filter(g=>inSel(topic,g[0])).map(g=>({kind:'g',g})));if(type!=='num')pool=pool.concat(TH.concat(CLASS).filter(q=>inSel(topic,q.topic)).map(q=>({kind:'t',q})));if(!pool.length)return null;const p=pick(pool);if(p.kind==='t')return Object.assign({type:'th'},p.q);const r=p.g[1]();if(r)return Object.assign({topic:p.g[0],type:'num',fx:p.g[2]},r)}return null}
+
+/* ---------- test engine ---------- */
+let T=null,tInt=null;
+$('#bGo').onclick=startTest;
+function startTest(){const top=$('#cTop').value,type=$('#cType').value,n=Math.max(3,Math.min(60,+$('#cN').value||15)),mins=+$('#cT').value,mode=$('#cMode').value;
+  let qs=[];if(top==='wrong'){const W=LS.get('wrong',[]);qs=shuffle(W).slice(0,n);if(!qs.length){$('#tBox').innerHTML='<div class="block"><p>No wrong answers saved yet. Take a test first.</p></div>';return}}
+  else{const seen=new Set();let guard=0;const ad=$('#cAd').value==='ad';while(qs.length<n&&guard++<n*20){const q=ad?adaptiveQ(top,type):genQ(top,type);if(!q)break;if(seen.has(q.q))continue;seen.add(q.q);qs.push(q)}}
+  T={qs,ans:Array(qs.length).fill(null),mode,start:Date.now(),limit:mins*qs.length*60,done:false};
+  const box=$('#tBox');box.innerHTML='';$('#tEnd').innerHTML='';
+  qs.forEach((q,i)=>{const el=mcq(Object.assign({},q,{q:`<b>${i+1}.</b> ${q.q}`}),{tag:(TOPICS[q.topic]||'')+(q.src==='class'?' · original slide question':q.type==='num'?' · new numbers':' · theory'),deferred:mode==='end',onPick:j=>{T.ans[i]=j;head()},onAnswer:ok=>{T.ans[i]=ok?q.a:-1;record(q,ok);head();if(T.ans.every(a=>a!==null))finish()}});box.appendChild(el)});
+  const fin=document.createElement('button');fin.className='btn gold';fin.textContent='Finish and correct';fin.type='button';fin.onclick=finish;box.appendChild(fin);
+  clearInterval(tInt);if(T.limit)tInt=setInterval(head,1000);head();box.scrollIntoView({behavior:'smooth'})}
+function record(q,ok){logAns(q.topic,ok);if(!ok){const W=LS.get('wrong',[]);if(!W.some(w=>w.q===q.q))W.push(q);LS.set('wrong',W.slice(-200))}else{LS.set('wrong',LS.get('wrong',[]).filter(w=>w.q!==q.q))}}
+function head(){if(!T)return;const answered=T.ans.filter(a=>a!==null).length;let tm='';if(T.limit&&!T.done){const left=Math.max(0,T.limit-Math.round((Date.now()-T.start)/1000));tm=`<span class="timer">${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</span>`;if(left===0)finish()}
+  const ok=T.mode==='now'?T.ans.filter((a,i)=>a===T.qs[i].a).length:null;
+  $('#tHead').innerHTML=`${tm}<span>${answered} / ${T.qs.length} answered</span>${ok!==null?`<span class="ans">${ok} correct</span>`:''}`}
+function finish(){if(!T||T.done)return;T.done=true;clearInterval(tInt);const cards=[...$('#tBox').querySelectorAll('.mcq')];let ok=0;
+  T.qs.forEach((q,i)=>{const a=T.ans[i];const right=a===q.a;if(right)ok++;if(T.mode==='end'){reveal(cards[i],q,a==null?-9:a);record(q,right)}else if(a===null){reveal(cards[i],q,-9);record(q,false)}});
+  const pct=ok/T.qs.length;const tests=LS.get('tests',[]);tests.push({d:Date.now(),n:T.qs.length,ok,top:$('#cTop').value});LS.set('tests',tests.slice(-100));renderTape();
+  $('#tEnd').innerHTML=`<div class="block ${pct>=.7?'good':pct>=.5?'key':'warn'}"><h3>${ok} / ${T.qs.length} correct · ${Math.round(pct*100)}%</h3><p>Equivalent mark: <b>${(pct*10).toFixed(1)} / 10</b>. Wrong answers are saved under "My wrong answers".</p><button class="btn pri" type="button" id="bAgain">New test</button></div>`;$('#bAgain').onclick=startTest;head();$('#tEnd').scrollIntoView({behavior:'smooth'})}
+
+/* ---------- stats ---------- */
+function renderStats(){const L=LS.get('log',[]),tests=LS.get('tests',[]);const tot=L.length,ok=L.filter(x=>x.ok).length;
+  const last7=L.filter(x=>Date.now()-x.d<7*864e5);
+  $('#sK').innerHTML=`<div class="kpi"><small>Answers</small><b>${tot}</b></div><div class="kpi hi"><small>Accuracy</small><b>${tot?Math.round(ok/tot*100):0}%</b></div><div class="kpi"><small>Last 7 days</small><b>${last7.length}</b></div><div class="kpi"><small>Tests taken</small><b>${tests.length}</b></div><div class="kpi"><small>Saved mistakes</small><b>${LS.get('wrong',[]).length}</b></div>`;
+  $('#sBars').innerHTML=PARTS.map(([pn,ks])=>{const P=L.filter(x=>ks.includes(x.t)),pp=P.length?Math.round(P.filter(x=>x.ok).length/P.length*100)+'%':'—';return `<div class="grp">${pn.toUpperCase()} · ${pp}</div>`+ks.map(k=>[k,TOPICS[k]]).map(([k,n])=>{const a=L.filter(x=>x.t===k),p=a.length?a.filter(x=>x.ok).length/a.length:0;return`<div class="row"><span>${n}</span><div class="tr"><div class="fl ${p<.5?'low':p<.7?'mid':''}" style="width:${a.length?Math.max(3,p*100):0}%"></div></div><span class="mono">${a.length?Math.round(p*100)+'%':'—'} <small>(${a.length})</small></span></div>`}).join('')}).join('');
+  $('#sTests').innerHTML=tests.length?`<table><thead><tr><th>Date</th><th>Topics</th><th>Score</th><th>Mark</th></tr></thead><tbody>${tests.slice(-12).reverse().map(t=>`<tr><td>${new Date(t.d).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td>${t.top==='all'?'All':t.top==='p61'?'T6 Part 1':TOPICS[t.top]||'Mistakes'}</td><td>${t.ok}/${t.n}</td><td>${(t.ok/t.n*10).toFixed(1)}</td></tr>`).join('')}</tbody></table>`:'<p>No tests yet.</p>'}
+$('#bReset').onclick=()=>{$('#resetAsk').innerHTML='Delete all stats? <button class="btn" id="rsY" type="button">Yes, delete</button> <button class="btn" id="rsN" type="button">Cancel</button>';$('#rsY').onclick=()=>{LS.set('log',[]);LS.set('tests',[]);LS.set('wrong',[]);$('#resetAsk').textContent='Stats deleted.';renderStats()};$('#rsN').onclick=()=>$('#resetAsk').textContent=''};
+
+/* ---------- gauge (T6.1) ---------- */
+function gauge(){const P=+$('#gPr').value,V=+$('#gVr').value;$('#gP').textContent='€'+P;$('#gV').textContent='€'+V;const d=(V-P)/P;const st=Math.abs(d)<.05?['Fairly valued','var(--gold)']:d>0?['Undervalued by the market','var(--bull)']:['Overvalued by the market','var(--bear)'];
+  const x=v=>20+(v-10)/40*320;
+  $('#gauge').innerHTML=`<line x1="20" y1="90" x2="340" y2="90" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/><line x1="${x(Math.min(P,V))}" y1="90" x2="${x(Math.max(P,V))}" y2="90" stroke="${st[1]}" stroke-width="10"/>
+  <circle cx="${x(P)}" cy="90" r="9" fill="var(--ink)"/><text x="${x(P)}" y="70" text-anchor="middle" class="ink">price €${P}</text>
+  <path d="M${x(V)} 104 l-8 14 h16z" fill="${st[1]}"/><text x="${x(V)}" y="134" text-anchor="middle" class="ink">value €${V}</text>
+  <text x="180" y="28" text-anchor="middle" class="lbl" style="font-weight:700;fill:${st[1]}">${st[0]}</text><text x="180" y="160" text-anchor="middle">gap ${(d*100).toFixed(1)}% of price</text>`}
+['#gPr','#gVr'].forEach(s=>$(s).oninput=gauge);gauge();
+
+/* ---------- Iberdrola ---------- */
+function ibe(){const n=+$('#ibN').value||0,r=+$('#ibR').value||1,c=+$('#ibC').value||0,m=+$('#ibM').value||0;const ns=Math.floor(n/r),left=n-ns*r;
+  $('#ibOut').innerHTML=`<div class="kpi"><small>Rights received</small><b>${n}</b></div><div class="kpi hi"><small>A · company cash</small><b>€${f2(n*c)}</b></div><div class="kpi"><small>B · sell rights</small><b>€${f2(n*m)}</b></div><div class="kpi"><small>C · new shares</small><b>${ns}</b></div><div class="kpi"><small>Shares after C</small><b>${n+ns}</b></div><div class="kpi"><small>Rights left over</small><b>${left}</b></div>`}
+['#ibN','#ibR','#ibC','#ibM'].forEach(s=>$(s).oninput=ibe);ibe();
+
+/* ---------- SVG helpers ---------- */
+function axes(W,H,m,xr,yr,xt,yt,xl,yl,fx,fy){const X=v=>m.l+(v-xr[0])/(xr[1]-xr[0])*(W-m.l-m.r),Y=v=>H-m.b-(v-yr[0])/(yr[1]-yr[0])*(H-m.t-m.b);let s='<g class="grid">';xt.forEach(v=>s+=`<line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${H-m.b}"/>`);yt.forEach(v=>s+=`<line x1="${m.l}" y1="${Y(v)}" x2="${W-m.r}" y2="${Y(v)}"/>`);s+='</g>';
+  s+=`<line class="ax" x1="${m.l}" y1="${H-m.b}" x2="${W-m.r}" y2="${H-m.b}"/><line class="ax" x1="${m.l}" y1="${m.t}" x2="${m.l}" y2="${H-m.b}"/>`;
+  xt.forEach(v=>s+=`<text x="${X(v)}" y="${H-m.b+15}" text-anchor="middle">${fx(v)}</text>`);yt.forEach(v=>s+=`<text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${fy(v)}</text>`);
+  s+=`<text x="${W-m.r}" y="${H-4}" text-anchor="end">${xl}</text><text x="${m.l}" y="${m.t-8}">${yl}</text>`;return{s,X,Y}}
+const ticks=(a,b,n)=>{const st=(b-a)/n,p=Math.pow(10,Math.floor(Math.log10(st))),u=[1,2,2.5,5,10].map(k=>k*p).find(k=>k>=st);const r=[];for(let v=Math.ceil(a/u)*u;v<=b+1e-9;v+=u)r.push(+v.toFixed(6));return r};
+
+/* ---------- multistage chart ---------- */
+(function(){const D0=1.49,g=[.2,.2,.2,.15,.15],k=.12,gL=.06;let d=D0;const pv=[];g.forEach((x,i)=>{d*=1+x;pv.push(['D'+(i+1),d/(1+k)**(i+1),'var(--blue)'])});const P5=d*(1+gL)/(k-gL);pv.push(['PV P₅',P5/(1+k)**5,'var(--gold)']);
+  const W=640,H=220,m={l:44,r:10,t:20,b:30},mx=36;const A=axes(W,H,m,[0,pv.length],[0,mx],[],[0,10,20,30],'','$ PV',x=>x,y=>'$'+y);let s=A.s;const bw=(W-m.l-m.r)/pv.length;
+  pv.forEach((p,i)=>{const x=m.l+i*bw+bw*.18,y=A.Y(p[1]);s+=`<rect x="${x}" y="${y}" width="${bw*.64}" height="${H-m.b-y}" fill="${p[2]}" rx="2"/><text x="${x+bw*.32}" y="${y-5}" text-anchor="middle" class="ink">${p[1].toFixed(2)}</text><text x="${x+bw*.32}" y="${H-m.b+15}" text-anchor="middle">${p[0]}</text>`});
+  s+=`<text x="${W-m.r}" y="${m.t}" text-anchor="end" class="lbl" style="font-weight:700">V₀ = $43.09 · terminal value = 79% of it</text>`;$('#msvg').innerHTML=s})();
+
+/* ---------- two-asset opportunity set ---------- */
+function port(){const rho=+$('#pRhoR').value;$('#pRho').textContent=rho.toFixed(2);const ea=+$('#pEA').value/100,sa=+$('#pSA').value/100,eb=+$('#pEB').value/100,sb=+$('#pSB').value/100,rf=+$('#pRf').value/100;
+  const pt=w=>{const e=w*ea+(1-w)*eb,v=w*w*sa*sa+(1-w)**2*sb*sb+2*w*(1-w)*rho*sa*sb;return[Math.sqrt(Math.max(v,0)),e]};
+  const curve=(r)=>{const a=[];for(let i=0;i<=100;i++){const w=i/100,v=w*w*sa*sa+(1-w)**2*sb*sb+2*w*(1-w)*r*sa*sb;a.push([Math.sqrt(Math.max(v,0)),w*ea+(1-w)*eb])}return a};
+  const pts=curve(rho);let gmv=pts[0],tan=null,best=-1e9;pts.forEach(p=>{if(p[0]<gmv[0])gmv=p;if(p[0]>1e-9){const sr=(p[1]-rf)/p[0];if(sr>best){best=sr;tan=p}}});
+  const wT=pts.indexOf(tan)/100,wG=pts.indexOf(gmv)/100;
+  const smax=Math.max(sa,sb)*1.15,emax=Math.max(ea,eb)*1.15,emin=Math.min(0,rf,Math.min(ea,eb)*.5);
+  const W=560,H=330,m={l:48,r:14,t:24,b:36};const A=axes(W,H,m,[0,smax],[emin,emax],ticks(0,smax,6),ticks(emin,emax,5),'σ (risk)','E(R)',v=>(v*100).toFixed(0)+'%',v=>(v*100).toFixed(0)+'%');let s=A.s;
+  const path=a=>a.map((p,i)=>(i?'L':'M')+A.X(p[0]).toFixed(1)+' '+A.Y(p[1]).toFixed(1)).join('');
+  [-1,0,1].forEach(r=>{if(Math.abs(r-rho)>.01)s+=`<path d="${path(curve(r))}" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4"/>`});
+  if(tan){const x2=smax;s+=`<path d="M${A.X(0)} ${A.Y(rf)} L${A.X(x2)} ${A.Y(rf+best*x2)}" stroke="var(--gold)" stroke-width="1.5" fill="none"/><text x="${A.X(x2)-4}" y="${A.Y(Math.min(emax,rf+best*x2))+14}" text-anchor="end" style="fill:var(--gold)">CAL</text>`}
+  s+=`<path d="${path(pts)}" fill="none" stroke="var(--bull)" stroke-width="3"/>`;
+  s+=`<circle cx="${A.X(sa)}" cy="${A.Y(ea)}" r="5" fill="var(--ink)"/><text x="${A.X(sa)+8}" y="${A.Y(ea)+4}" class="ink">A</text><circle cx="${A.X(sb)}" cy="${A.Y(eb)}" r="5" fill="var(--ink)"/><text x="${A.X(sb)+8}" y="${A.Y(eb)+4}" class="ink">B</text>`;
+  s+=`<circle cx="${A.X(gmv[0])}" cy="${A.Y(gmv[1])}" r="6" fill="var(--blue)"/><text x="${A.X(gmv[0])+8}" y="${A.Y(gmv[1])+16}" style="fill:var(--blue)">GMV</text>`;
+  if(tan)s+=`<circle cx="${A.X(tan[0])}" cy="${A.Y(tan[1])}" r="6" fill="var(--gold)"/><text x="${A.X(tan[0])-8}" y="${A.Y(tan[1])-8}" text-anchor="end" style="fill:var(--gold)">M</text><circle cx="${A.X(0)}" cy="${A.Y(rf)}" r="4" fill="var(--gold)"/>`;
+  $('#pSvg').innerHTML=s;
+  $('#pOut').innerHTML=`<div class="kpi"><small>GMV weight in A</small><b>${pc(wG,0)}</b></div><div class="kpi"><small>GMV σ</small><b>${pc(gmv[0])}</b></div><div class="kpi hi"><small>M (max Sharpe) in A</small><b>${tan?pc(wT,0):'—'}</b></div><div class="kpi"><small>M: E(R) / σ</small><b>${tan?pc(tan[1])+' / '+pc(tan[0]):'—'}</b></div><div class="kpi"><small>Sharpe of M</small><b>${tan?best.toFixed(3):'—'}</b></div>`}
+['#pRhoR','#pEA','#pSA','#pEB','#pSB','#pRf'].forEach(s=>$(s).oninput=port);
+$$('[data-rho]').forEach(b=>b.onclick=()=>{$('#pRhoR').value=b.dataset.rho;port()});port();
+
+/* ---------- diversification ---------- */
+function divers(){const N=+$('#dNr').value,s=+$('#dSr').value,r=+$('#dRr').value;$('#dN').textContent=N;$('#dS').textContent=s;$('#dR').textContent=r.toFixed(2);
+  const sp=n=>Math.sqrt(s*s/n+(1-1/n)*r*s*s);const fl=s*Math.sqrt(r);
+  const W=560,H=280,m={l:44,r:14,t:20,b:34};const A=axes(W,H,m,[1,60],[0,s*1.08],[1,10,20,30,40,50,60],ticks(0,s*1.08,5),'number of holdings N','σp %',v=>v,v=>v);let st=A.s;
+  let d='',area='M'+A.X(1)+' '+A.Y(fl);for(let n=1;n<=60;n++){d+=(n>1?'L':'M')+A.X(n).toFixed(1)+' '+A.Y(sp(n)).toFixed(1);area+='L'+A.X(n).toFixed(1)+' '+A.Y(sp(n)).toFixed(1)}area+='L'+A.X(60)+' '+A.Y(fl)+'Z';
+  st+=`<path d="${area}" fill="var(--blue-soft)"/><line x1="${A.X(1)}" y1="${A.Y(fl)}" x2="${A.X(60)}" y2="${A.Y(fl)}" stroke="var(--bear)" stroke-dasharray="6 4" stroke-width="1.5"/><text x="${A.X(60)}" y="${A.Y(fl)+16}" text-anchor="end" style="fill:var(--bear)">systematic floor σ√ρ = ${fl.toFixed(2)}%</text>`;
+  st+=`<path d="${d}" fill="none" stroke="var(--blue)" stroke-width="3"/><circle cx="${A.X(N)}" cy="${A.Y(sp(N))}" r="6" fill="var(--gold)"/><text x="${A.X(N)+9}" y="${A.Y(sp(N))-8}" class="ink">${sp(N).toFixed(2)}%</text><text x="${A.X(20)}" y="${A.Y((sp(20)+fl)/2)+4}" style="fill:var(--blue)">diversifiable</text>`;
+  $('#dSvg').innerHTML=st;const varTerm=s*s/N,covTerm=(1-1/N)*r*s*s;
+  $('#dOut').innerHTML=`<div class="kpi hi"><small>Portfolio σ</small><b>${sp(N).toFixed(2)}%</b></div><div class="kpi"><small>Risk floor</small><b>${fl.toFixed(2)}%</b></div><div class="kpi"><small>Variance terms share</small><b>${pc(varTerm/(varTerm+covTerm||1),0)}</b></div><div class="kpi"><small>Covariance terms share</small><b>${pc(covTerm/(varTerm+covTerm||1),0)}</b></div>`}
+['#dNr','#dSr','#dRr'].forEach(s=>$(s).oninput=divers);divers();
+
+/* ---------- comps engine ---------- */
+let peers=[{n:'Peer A',x:800,y:100,u:1},{n:'Peer B',x:1200,y:120,u:1},{n:'Peer C',x:1800,y:150,u:1}];
+function compsRender(){const ev=$('#cmM').value==='ev';$('#cmH1').textContent=ev?'EV €m':'Price €';$('#cmH2').textContent=ev?'EBITDA €m':'EPS €';
+  $('#cmBody').innerHTML=peers.map((p,i)=>`<tr><td>${p.n}</td><td><input type="number" id="cmx${i}" value="${p.x}" data-i="${i}" data-k="x"></td><td><input type="number" id="cmy${i}" value="${p.y}" data-i="${i}" data-k="y" step="0.01"></td><td class="mono">${(p.x/p.y).toFixed(2)}×</td><td><input type="checkbox" id="cmu${i}" ${p.u?'checked':''} data-i="${i}" data-k="u" aria-label="Use ${p.n}"></td></tr>`).join('');
+  $$('#cmBody input').forEach(inp=>inp.oninput=inp.onchange=()=>{const p=peers[+inp.dataset.i];if(inp.dataset.k==='u')p.u=inp.checked?1:0;else p[inp.dataset.k]=+inp.value;compsCalc(true)});compsCalc()}
+function compsCalc(partial){const ev=$('#cmM').value==='ev';const ms=peers.filter(p=>p.u&&p.y).map(p=>p.x/p.y).sort((a,b)=>a-b);if(partial)$$('#cmBody tr').forEach((tr,i)=>tr.children[3].textContent=(peers[i].x/peers[i].y).toFixed(2)+'×');
+  if(!ms.length){$('#cmOut').innerHTML='<p>Select at least one peer.</p>';return}
+  const med=ms.length%2?ms[(ms.length-1)/2]:(ms[ms.length/2-1]+ms[ms.length/2])/2,mean=ms.reduce((a,b)=>a+b,0)/ms.length;const m=$('#cmS').value==='med'?med:mean;const t=+$('#cmT').value,nd=+$('#cmD').value,sh=+$('#cmSh').value||1;
+  if(ev){const EV=m*t,EQ=EV-nd,P=EQ/sh;$('#cmOut').innerHTML=`<div class="kpi"><small>Median</small><b>${med.toFixed(2)}×</b></div><div class="kpi"><small>Mean</small><b>${mean.toFixed(2)}×</b></div><div class="kpi"><small>EV</small><b>€${f1(EV)}m</b></div><div class="kpi"><small>Equity</small><b>€${f1(EQ)}m</b></div><div class="kpi hi"><small>Price / share</small><b>€${f2(P)}</b></div>`;$('#cmSteps').innerHTML=`EV = ${m.toFixed(2)} × ${t} = €${f1(EV)}m → equity = ${f1(EV)} − ${nd} = €${f1(EQ)}m → price = ${f1(EQ)} ÷ ${sh}m = <b>€${f2(P)}</b>`}
+  else{const P=m*t;$('#cmOut').innerHTML=`<div class="kpi"><small>Median</small><b>${med.toFixed(2)}×</b></div><div class="kpi"><small>Mean</small><b>${mean.toFixed(2)}×</b></div><div class="kpi hi"><small>Price / share</small><b>€${f2(P)}</b></div><div class="kpi"><small>Equity value</small><b>€${f1(P*sh)}m</b></div>`;$('#cmSteps').innerHTML=`P/E gives the price directly: ${m.toFixed(2)} × €${t} = <b>€${f2(P)}</b>. No net-debt step.`}}
+$('#cmM').onchange=()=>{const ev=$('#cmM').value==='ev';peers=ev?[{n:'Peer A',x:800,y:100,u:1},{n:'Peer B',x:1200,y:120,u:1},{n:'Peer C',x:1800,y:150,u:1}]:[{n:'Peer A',x:24,y:2,u:1},{n:'Peer B',x:28,y:2,u:1},{n:'Peer C',x:32,y:2,u:1}];$('#cmT').value=ev?50:1.2;compsRender()};
+['#cmS','#cmT','#cmD','#cmSh'].forEach(s=>$(s).oninput=()=>compsCalc());
+$('#cmAdd').onclick=()=>{peers.push({n:'Peer '+String.fromCharCode(65+peers.length),x:peers[0].x,y:peers[0].y,u:1});compsRender()};compsRender();
+
+/* ---------- NAV ---------- */
+const NV=[['Land and buildings',3,4,'a'],['Machinery',2,1.5,'a'],['Inventory',1,1,'a'],['Cash',.5,.5,'a'],['Bank debt',2,2,'l'],['Other liabilities',.5,.5,'l']];
+$('#nvBody').innerHTML=NV.map((r,i)=>`<tr><td>${r[3]==='l'?'− ':''}${r[0]}</td><td><input type="number" step="0.1" id="nvb${i}" value="${r[1]}"></td><td><input type="number" step="0.1" id="nvc${i}" value="${r[2]}"></td></tr>`).join('');
+function nav(){let ab=0,ac=0,lb=0,lc=0;NV.forEach((r,i)=>{const b=+$('#nvb'+i).value,c=+$('#nvc'+i).value;if(r[3]==='a'){ab+=b;ac+=c}else{lb+=b;lc+=c}});const sh=+$('#nvSh').value||1;
+  $('#nvOut').innerHTML=`<div class="kpi"><small>Book equity</small><b>€${f2(ab-lb)}m</b></div><div class="kpi"><small>Adjustments</small><b>${(ac-ab-(lc-lb))>=0?'+':''}${f2(ac-ab-(lc-lb))}</b></div><div class="kpi"><small>Adjusted NAV</small><b>€${f2(ac-lc)}m</b></div><div class="kpi hi"><small>NAV per share</small><b>€${f2((ac-lc)/sh)}</b></div>`}
+$$('#nvBody input').concat([$('#nvSh')]).forEach(i=>i.oninput=nav);nav();
+
+/* ---------- DDM builder ---------- */
+function ddm(){const D0=+$('#ddD').value,k=+$('#ddK').value/100,gL=+$('#ddL').value/100;const gs=$('#ddG').value.split(',').map(x=>x.trim()).filter(x=>x!=='').map(x=>+x/100);
+  if(gL>=k){$('#ddTbl').innerHTML='<div class="warn">Long-term growth must be lower than k for the terminal value.</div>';$('#ddOut').innerHTML='';return}
+  let d=D0,pv=0,rows='';gs.forEach((g,i)=>{d*=1+g;const p=d/(1+k)**(i+1);pv+=p;rows+=`<tr><td>${i+1}</td><td>${pc(g,1)}</td><td>${d.toFixed(4)}</td><td>${(1/(1+k)**(i+1)).toFixed(4)}</td><td>${p.toFixed(4)}</td></tr>`});
+  const N=gs.length,Dn1=d*(1+gL),P=Dn1/(k-gL),pvP=P/(1+k)**N;rows+=`<tr><td>P<sub>${N}</sub></td><td>${pc(gL,1)}</td><td>D<sub>${N+1}</sub>=${Dn1.toFixed(4)} → ${P.toFixed(4)}</td><td>${(1/(1+k)**N).toFixed(4)}</td><td>${pvP.toFixed(4)}</td></tr>`;
+  $('#ddTbl').innerHTML=`<table><thead><tr><th>Year</th><th>g</th><th>Dividend</th><th>DF</th><th>PV</th></tr></thead><tbody>${rows}<tr class="tot"><td>V₀</td><td></td><td></td><td></td><td>${(pv+pvP).toFixed(4)}</td></tr></tbody></table>`;
+  $('#ddOut').innerHTML=`<div class="kpi"><small>PV of dividends</small><b>${f2(pv)}</b></div><div class="kpi"><small>PV of terminal value</small><b>${f2(pvP)}</b></div><div class="kpi hi"><small>Value V₀</small><b>${f2(pv+pvP)}</b></div><div class="kpi"><small>TV share of value</small><b>${pc(pvP/(pv+pvP),0)}</b></div>`}
+['#ddD','#ddK','#ddG','#ddL'].forEach(s=>$(s).oninput=ddm);ddm();
+
+/* ---------- CAPM + Gordon ---------- */
+function quick(){const rf=+$('#qRf').value/100,rm=+$('#qRm').value/100,b=+$('#qB').value,D0=+$('#qD').value,E=+$('#qE').value,roe=+$('#qR').value/100,P=+$('#qP').value;const kc=rf+b*(rm-rf),k=$('#qK').value==='capm'?kc:+$('#qKm').value/100;const ret=1-D0/E,g=ret*roe;
+  let V=null,msg='';if(g>=k)msg='<div class="warn">g ≥ k: the Gordon model cannot be used. Use a multistage model.</div>';else{V=D0*(1+g)/(k-g);const d=(V-P)/P;msg=`<div class="${Math.abs(d)<.03?'key':d>0?'good':'warn'}">Value $${f2(V)} vs price $${f2(P)} → <b>${Math.abs(d)<.03?'fairly valued':d>0?'undervalued':'overvalued'}</b>. Growth adds $${f2(V-D0/k)} over the no-growth value $${f2(D0/k)}.</div>`}
+  $('#qOut').innerHTML=`<div class="kpi"><small>k (CAPM)</small><b>${pc(kc)}</b></div><div class="kpi"><small>k used</small><b>${pc(k)}</b></div><div class="kpi"><small>Retention b</small><b>${ret.toFixed(4)}</b></div><div class="kpi"><small>g = b × ROE</small><b>${pc(g)}</b></div><div class="kpi hi"><small>Gordon V₀</small><b>${V==null?'—':'$'+f2(V)}</b></div>`;$('#qMsg').innerHTML=msg}
+['#qRf','#qRm','#qB','#qD','#qE','#qR','#qK','#qKm','#qP'].forEach(s=>$(s).oninput=quick);$('#qK').value='man';quick();
+
+/* ---------- formulas ---------- */
+const FORM=[
+ ['Mispricing rule','V>P\\Rightarrow\\text{under};\\ V<P\\Rightarrow\\text{over}','T6 P1 · slide 6'],
+ ['Equity value (market cap)','\\text{Equity} = \\text{shares}\\times\\text{price}','T6 P1 · comps · slide 18'],
+ ['Enterprise value','\\begin{aligned}EV &= \\text{Equity} + \\text{Debt} - \\text{Cash}\\\\ &= \\text{Market cap} + \\text{Net debt}\\end{aligned}','T6 P1 · comps · slides 18, 20, 22'],
+ ['Net debt','\\text{Net debt} = \\text{Gross debt} - \\text{Excess cash}','T6 P1 · comps · slides 25, 34'],
+ ['EV/EBITDA','\\frac{EV}{EBITDA}','T6 P1 · comps · slide 11'],
+ ['Multiples by family','\\begin{gathered}\\text{EV-based: } \\frac{EV}{Revenue},\\ \\frac{EV}{EBITDA},\\ \\frac{EV}{EBIT}\\\\ \\text{Equity-based: } \\frac{P}{E},\\ \\frac{P}{BV}\\end{gathered}','T6 P1 · comps · slide 19 (never EBITDA × P/E)'],
+ ['Implied EV (step 1)','EV_{target} = m_{peers}\\times EBITDA_{target}','T6 P1 · comps · slides 12, 25'],
+ ['Equity from EV (step 2)','\\text{Equity value} = EV - \\text{Net debt}','T6 P1 · comps · slide 25'],
+ ['Price per share (step 3)','P = \\frac{\\text{Equity value}}{\\text{diluted shares}}','T6 P1 · comps · slide 25'],
+ ['Price from EV multiple','P = \\frac{m\\times EBITDA_{target} - \\text{Net debt}}{\\text{diluted shares}}','T6 P1 · comps · slide 25 (steps 1–3)'],
+ ['P/E','P/E = \\frac{\\text{Price}}{EPS} = \\frac{\\text{Equity value}}{\\text{Net income}}','T6 P1 · comps · slides 19, 26'],
+ ['Price from P/E','P = (P/E)_{peers}\\times EPS_{target}','T6 P1 · comps · slide 27'],
+ ['Mean vs median multiple','\\begin{gathered}\\bar m = \\frac{1}{n}\\sum m_i\\\\ \\tilde m = \\text{middle value after sorting}\\end{gathered}','T6 P1 · comps · slide 30 (mean sensitive to outliers)'],
+ ['Equity (asset-based)','\\text{Book equity} = \\text{Total assets} - \\text{Total liabilities}','T6 P1 · asset-based · slides 38–39'],
+ ['Adjusted NAV per share','\\frac{\\text{Assets at current value} - \\text{Liabilities} - \\text{Preferred}}{\\text{shares}}','T6 P1 · asset-based · slides 37, 43'],
+ ['Adjusted NAV (adjustment route)','\\text{Adj. NAV} = \\text{Book equity} + \\sum \\text{asset adjustments}','T6 P1 · asset-based · slide 42'],
+ ['Payout and retention','\\begin{gathered}\\text{payout} = \\frac{\\text{Dividends}}{\\text{Net income}} = \\frac{DPS}{EPS}\\\\ b = 1-\\text{payout}\\end{gathered}','T6 P1 · slide 52; P2 · slide 15'],
+ ['Retained earnings','\\text{Retained} = \\text{Net income} - \\text{Dividends}','T6 P1 · distributions · slide 51'],
+ ['Total distributions','\\begin{aligned}\\text{Total} = {}&\\text{Dividends} + \\text{Share premium repaid}\\\\ &+ \\text{Capital reductions}\\end{aligned}','T6 P1 · distributions · slide 54 (BME)'],
+ ['Share capital and premium','\\begin{gathered}\\text{Capital} = N\\times\\text{nominal}\\\\ \\text{Premium} = N\\times(\\text{issue price}-\\text{nominal})\\end{gathered}','T6 P1 · distributions · slide 55'],
+ ['Capital reduction cash','\\text{Cash} = (\\text{nominal}_{old}-\\text{nominal}_{new})\\times\\text{shares}','T6 P1 · distributions · slide 56'],
+ ['Ex-dividend price','P_{ex} = P_{cum} - D','T6 P1 · distributions · slide 60'],
+ ['Cash dividend: wealth unchanged','N\\times P_{cum} = N\\times P_{ex} + N\\times D','T6 P1 · distributions · slide 60'],
+ ['Price after stock dividend','P_{after} = \\frac{P_{before}}{1+s}','T6 P1 · distributions · slide 62'],
+ ['Stock dividend: wealth unchanged','N(1+s)\\times P_{after} = N\\times P_{before}','T6 P1 · distributions · slide 62'],
+ ['Ownership %','\\text{Ownership} = \\frac{\\text{your shares}}{\\text{shares outstanding}}','T6 P1 · distributions · slide 63 (unchanged by a stock dividend)'],
+ ['Rights received','\\text{rights} = \\text{shares}\\times 1','T6 P1 · distributions · slides 65, 66, 74'],
+ ['Scrip: new shares','\\text{new shares} = \\frac{\\text{rights}}{\\text{rights per new share}}','T6 P1 · distributions · slide 66'],
+ ['Flexible dividend: three options','\\begin{aligned}&A:\\ \\text{shares}\\times DPS_{gross}\\\\ &B:\\ \\text{rights}\\times P_{right}\\\\ &C:\\ \\frac{\\text{rights}}{\\text{ratio}}\\ \\text{new shares}\\end{aligned}','T6 P1 · distributions · slide 70 (Iberdrola)'],
+ ['CAPM','k_e = r_f + \\beta(r_m - r_f)','T6 P2 · slides 3–4'],
+ ['One-period DDM','V_0 = \\frac{D_1}{(1+k_e)^1} + \\frac{P_1}{(1+k_e)^1},\\quad D_1 = D_0(1+g)','T6 P2 · slides 3, 6, 7'],
+ ['Constant-growth dividends','D_n = D_0(1+g)^n','T6 P2 · slide 8'],
+ ['Multi-year DDM','V_0 = \\frac{D_1}{(1+k_e)^1}+\\frac{D_2}{(1+k_e)^2}+\\dots+\\frac{D_n+P_n}{(1+k_e)^n}','T6 P2 · slides 8, 11'],
+ ['Gordon growth','P_0 = \\frac{D_0(1+g)}{k-g} = \\frac{D_1}{k-g},\\ g<k','T6 P2 · slides 15, 18'],
+ ['Sustainable growth','g = b\\times ROE','T6 P2 · slide 15'],
+ ['Implied required return','k = \\frac{D_1}{P_0} + g','T6 P2 · derived from Gordon'],
+ ['No-growth value','V = \\frac{D_0}{k}','T6 P2 · slide 16 (derived: what growth adds)'],
+ ['Terminal value (multistage)','P_n = \\frac{D_{n+1}}{k-g_L}\\ \\text{discounted } n \\text{ periods}','T6 P2 · slides 22–23'],
+ ['Delayed dividend','\\begin{gathered}D_{n+1} = \\text{payout}\\times E_{n+1}\\\\ P_n = \\frac{D_{n+1}}{k-g}\\qquad V_0 = \\frac{P_n}{(1+k)^n}\\end{gathered}','T6 P2 · slide 23'],
+ ['Sample mean','\\bar R = \\frac{1}{K}\\sum_{i=1}^{K}R_i','T7 P1 · slide 15'],
+ ['Sample variance','s^2 = \\frac{1}{K-1}\\sum_{i=1}^{K}(R_i-\\bar R)^2','T7 P1 · slide 15'],
+ ['Standard deviation','s = \\sigma = std = \\sqrt{s^2}\\ (\\text{same units as returns})','T7 P1 · slide 16'],
+ ['Portfolio weights','w_i = \\frac{\\text{€ in } i}{\\text{€ total}},\\quad \\sum_{i=1}^{N} w_i = 1','T7 P1 · slide 23 (weights may be negative)'],
+ ['Portfolio expected return','E(R_p) = \\sum w_i\\bar R_i','T7 P1 · slide 24'],
+ ['Portfolio variance (N)','\\begin{aligned}Var(R_p) &= \\sum_{i}\\sum_{j}w_iw_j\\rho_{ij}s_is_j\\\\ &= \\sum_i w_i^2s_i^2 + \\sum_{i\\neq j}w_iw_j\\rho_{ij}s_is_j\\end{aligned}','T7 P1 · slides 24–25, 36'],
+ ['Number of terms','N \\text{ variance terms},\\quad N(N-1) \\text{ covariance terms}','T7 P1 · slides 24–25'],
+ ['Correlation','\\rho_{ij} = \\frac{Cov_{ij}}{s_is_j},\\quad -1\\le\\rho\\le 1,\\quad \\rho_{12}=\\rho_{21}','T7 P1 · slides 23, 27 (verbal on slide)'],
+ ['Two-asset variance','Var(R_p) = w_1^2s_1^2 + w_2^2s_2^2 + 2w_1w_2\\rho_{1,2}s_1s_2','T7 P1 · slide 36'],
+ ['Two-asset σ','std(R_p) = \\sqrt{w_1^2s_1^2 + w_2^2s_2^2 + 2w_1w_2\\rho_{1,2}s_1s_2}','T7 P1 · slide 36'],
+ ['ρ = +1','std(R_p) = w_1s_1 + w_2s_2','T7 P1 · slide 37'],
+ ['ρ = −1','std(R_p) = |w_1s_1 - w_2s_2|;\\ \\text{zero risk at } w_1^{*} = \\frac{s_2}{s_1+s_2}','T7 P1 · slide 37 (w₁* derived)'],
+ ['Equal-weight N assets','\\sigma_p^2 = \\frac{\\sigma^2}{N} + \\left(1-\\frac{1}{N}\\right)\\rho\\sigma^2','T7 P1 · model behind slides 28, 60–61'],
+ ['Diversification ratio','DR = \\frac{\\sum w_i s_i}{\\sigma_p}','T7 P1 · slide 41'],
+ ['Annual → daily','E(R_d) \\approx \\frac{E(R_a)}{252},\\ \\sigma_d \\approx \\frac{\\sigma_a}{\\sqrt{252}}\\ (\\sqrt{252}\\approx 15.87)','T7 P1 · slide 46 (i.i.d. daily returns)'],
+ ['Sharpe ratio','S = \\frac{E(R_p)-R_f}{\\sigma_p},\\ S_a = S_d\\sqrt{252}','T7 P1 · slides 47–50 (numbers on slide)']
+];
+function renderForm(q){q=(q||'').toLowerCase();const grp=f=>f[2].startsWith('T7')?'Topic 7 · Part 1':f[2].startsWith('T6 P2')?'Topic 6 · Part 2':'Topic 6 · Part 1';let last='';$('#fList').innerHTML=FORM.filter(f=>!q||(f[0]+f[2]).toLowerCase().includes(q)).map(f=>{const g=grp(f),h=g!==last?`<div class="fgroup">${g.toUpperCase()}</div>`:'';last=g;return h+`<div class="fitem"><span class="nm">${f[0]}</span><span class="tx" data-tex="${f[1].replace(/"/g,'&quot;')}"></span><span class="s">${f[2]}</span></div>`}).join('');tex($('#fList'))}
+$('#fQ').oninput=e=>renderForm(e.target.value);renderForm();
+
+/* ---------- glossary ---------- */
+const GL=[['Intrinsic value','Theoretically correct (fair) value of an asset based on its fundamentals.'],['Stakeholder','Any entity with a vested interest in an organization and affected by its performance.'],['Shareholder','Owner of at least one share of the company.'],['Trading comps','Relative valuation using multiples of similar listed companies.'],['Enterprise value (EV)','Approximate value of the operating business: equity + debt − cash.'],['Equity value','Value of all shares together (market capitalization).'],['EBITDA','Earnings before interest, taxes, depreciation and amortization. Not a cash flow.'],['LTM','Last twelve months: historical financial figures.'],['Forward multiple','Multiple based on analysts\' forecast figures (e.g. forward P/E with next year\'s EPS).'],['Diluted shares','Shares outstanding including the effect of options and convertibles.'],['Outlier','An extreme multiple that distorts the mean.'],['Book (carrying) value','Value at which an item is recorded on the balance sheet.'],['Adjusted NAV','Assets at estimated current value minus liabilities.'],['Cost model (IAS 16.30)','PP&E at cost less accumulated depreciation and impairment.'],['Revaluation model (IAS 16.31)','PP&E at fair value at revaluation less later depreciation and impairment.'],['Payout ratio','Dividends ÷ net income (DPS ÷ EPS).'],['Retention rate (b)','1 − payout ratio.'],['Declaration date','Date the company announces or approves the dividend.'],['Ex-dividend date','From this date new buyers do not receive the upcoming dividend.'],['Record date','Date the company identifies shareholders entitled to the dividend.'],['Payment date','Date the cash is paid.'],['Special dividend','Extra, non-recurring cash dividend.'],['Stock dividend','Distribution of additional shares instead of cash.'],['Scrip / flexible dividend','Shareholders choose cash or shares (and, in Spain, can sell rights).'],['Free allocation right','Derecho de asignación gratuita: one per share; a fixed number gives one new share.'],['Share premium','Amount paid above nominal value when shares are issued.'],['Capital reduction','Cash returned by lowering the nominal value of shares.'],['Share repurchase (buyback)','Company buys back its own shares.'],['DDM','Dividend discount model: PV of expected dividends.'],['Cost of equity (kₑ)','Required return of shareholders; often from CAPM.'],['Beta (β)','Sensitivity of a stock\'s return to market returns (systematic risk).'],['Equity risk premium','rₘ − r_f.'],['Gordon growth model','Constant-growth perpetuity DDM: D₁/(k − g).'],['Multistage DDM','DDM with different growth rates for different periods.'],['Terminal value','Value at the start of the constant-growth stage.'],['Portfolio weight','Share of total invested wealth in one asset; weights sum to 1.'],['Variance','Expected squared deviation from the mean; measures dispersion.'],['Standard deviation','Square root of variance; same units as returns.'],['Covariance','Degree to which two returns move together.'],['Correlation (ρ)','Covariance scaled to [−1, +1].'],['Opportunity (feasible) set','All risk–return combinations attainable from the assets.'],['Minimum-variance frontier','Lowest variance for each level of expected return.'],['Global minimum-variance portfolio','Lowest-risk portfolio on the MVF.'],['Efficient frontier','Part of the MVF above the GMV portfolio.'],['Systematic risk','Market-wide risk that cannot be diversified away.'],['Unsystematic risk','Firm-specific (idiosyncratic) risk, reduced by diversification.'],['Diversification ratio','Weighted average σ ÷ portfolio σ.'],['Sharpe ratio','Excess return per unit of risk.'],['CAL','Capital allocation line: combinations of the risk-free asset and a risky portfolio.'],['VaR','Value at Risk: loss threshold at a confidence level (CFA Level II).']];
+function renderGlos(q){q=(q||'').toLowerCase();$('#gList').innerHTML=GL.filter(g=>!q||(g[0]+g[1]).toLowerCase().includes(q)).sort((a,b)=>a[0].localeCompare(b[0])).map(g=>`<div><b>${g[0]}</b><br>${g[1]}</div>`).join('')}
+$('#gQ').oninput=e=>renderGlos(e.target.value);renderGlos();
+
+/* ---------- flashcards ---------- */
+const CARDS=[
+ ['dist','Share capital vs share premium','Capital = N × nominal; premium = N × (issue price − nominal). 1m shares, nominal €1, issued at €5 → capital €1m, premium €4m.'],
+ ['dist','Stock dividend: wealth?','Unchanged: N(1+s) × P_after = N × P_before. 100 × €20 = 110 × €18.18. Ownership % unchanged.'],
+ ['dist','Flexible dividend: options A, B, C','A: company cash (shares × gross DPS) · B: sell rights on market (rights × P_right) · C: new shares (rights ÷ ratio)'],
+ ['port','Std vs variance units','Std is in the same units as returns (%); variance is in squared units (%²).'],
+ ['port','How many terms in Var(Rp)?','N variance terms and N(N − 1) covariance terms → covariances dominate as N grows.'],
+ ['port','Weights must…','Sum to 1 (they may be negative = short positions).'],
+ ['basics','Three model families','Present value (DDM/DCF) · Comparable companies (multiples) · Asset-based (assets − liabilities)'],
+ ['basics','Value > price?','Undervalued by the market. Value < price: overvalued. Equal: fairly valued.'],
+ ['comps','EV formula','Market cap + debt − cash (simplified). Same date for all three.'],
+ ['comps','EV multiple → price','m × EBITDA = EV → − net debt = equity → ÷ diluted shares'],
+ ['comps','P/E → price','Peer P/E × target EPS = price directly. Match forward P/E with forecast EPS.'],
+ ['comps','Mean vs median','Mean: sensitive to outliers. Median: more robust. Never delete outliers to hit a target.'],
+ ['comps','5 peer criteria','Industry · geography · size · growth · profitability'],
+ ['comps','Why multiples differ','Growth · margins · investment needs · risk'],
+ ['asset','Adjusted NAV example','Book 6.5 − 2.5 = 4.0; land +1.0, machinery −0.5 → NAV 4.5 → €4.50/share'],
+ ['asset','IAS 16 cost vs revaluation','Cost: no write-up for land gains. Revaluation: fair value. Chosen per asset class (16.29).'],
+ ['dist','4 dividend dates','Declaration → ex-dividend → record → payment'],
+ ['dist','Stock dividend price','P ÷ (1 + s). €20 ÷ 1.10 = €18.18. Ownership % unchanged.'],
+ ['dist','Flexible dividend: 3 choices','A company cash (company pays) · B sell rights (market pays) · C new shares'],
+ ['dist','Iberdrola Jan 2026','73 rights per new share · €0.253 gross cash · 1 right per share'],
+ ['dist','BME 2025','Dividends €41,503.35m + share premium €982m + capital reductions €186m = €42,671.35m'],
+ ['ddm','CAPM','kₑ = r_f + β(rₘ − r_f). Slide example: 6% + 1.2 × 5% = 12%'],
+ ['ddm','Gordon','D₁/(k − g), g < k, constant forever. g = b × ROE'],
+ ['ddm','Global Transporters','g = 13.53%, V = $34.21 vs $28 → undervalued; growth adds $24.46'],
+ ['ddm','Delayed dividend trick','Gordon with D₄ gives P₃, so discount 3 periods, not 4.'],
+ ['ddm','When not Gordon','No dividends yet · young firm entering growth · growth expected to change'],
+ ['port','Portfolio variance','Σwᵢ²sᵢ² + Σ_{i≠j} wᵢwⱼρᵢⱼsᵢsⱼ. N variance terms, N(N−1) covariance terms.'],
+ ['port','ρ = −1','Zero risk possible: w_A = s_B/(s_A + s_B)'],
+ ['port','Dow 30 puzzle','Avg σ 6.72% vs portfolio 4.51% (−32.9%): imperfect correlation'],
+ ['port','Limit of diversification','Diversifiable part falls as 1/N; floor = systematic risk (σ√ρ)'],
+ ['port','Annual → daily','E(R) ÷ 252; σ ÷ √252 (≈15.87). Sharpe × √252 to annualize.'],
+ ['port','Efficient frontier','Part of the MVF above the global minimum-variance portfolio']
+];
+let cf='due';const DAY=864e5,IV=[0,1,3,7,14];
+const srsGet=()=>LS.get('srs',{});
+const cardSt=(S,c)=>S[c[1]]||{b:1,due:0};
+function cardsDue(){const S=srsGet(),now=Date.now();return CARDS.filter(c=>cardSt(S,c).due<=now).length}
+function renderCards(){const S=srsGet(),now=Date.now();const due=c=>cardSt(S,c).due<=now;
+  $('#srs').innerHTML=`<span class="due">Due now <b>${CARDS.filter(due).length}</b></span>`+[1,2,3,4,5].map(b=>`<span>Box ${b} <b>${CARDS.filter(c=>cardSt(S,c).b===b).length}</b></span>`).join('');
+  $('#cardF').innerHTML=['due','all',...Object.keys(TOPICS)].map(k=>`<button class="btn${cf===k?' pri':''}" type="button" data-cf="${k}">${k==='due'?'Due now':k==='all'?'All':TOPICS[k]}</button>`).join('');$$('[data-cf]').forEach(b=>b.onclick=()=>{cf=b.dataset.cf;renderCards()});
+  const list=CARDS.filter(c=>cf==='all'||cf==='due'?(cf==='all'||due(c)):c[0]===cf).sort((a,b)=>(due(b)-due(a))||(cardSt(S,a).b-cardSt(S,b).b));
+  $('#cardBox').innerHTML=list.length?list.map(c=>{const st=cardSt(S,c),d=due(c),inD=Math.ceil((st.due-now)/DAY);return `<div class="card${d?' due':''}" data-k="${c[1].replace(/"/g,'&quot;')}"><button class="f" type="button"><small><span>${TOPICS[c[0]]}</span><i>Box ${st.b} · ${d?'due':'in '+inD+'d'}</i></small><b>${c[1]}</b><span class="b">${c[2]}</span></button><div class="rate"><button type="button" class="no">Again</button><button type="button" class="yes">Got it</button></div></div>`}).join(''):'<div class="block good"><p>Nothing due right now. Come back tomorrow, or pick <b>All</b> to review anyway.</p></div>';
+  $$('.card').forEach(el=>{el.querySelector('.f').onclick=()=>el.classList.toggle('flip');const rate=ok=>{const S=srsGet(),k=el.dataset.k,st=S[k]||{b:1,due:0};st.b=ok?Math.min(5,st.b+1):1;st.due=Date.now()+IV[st.b-1]*DAY-(st.b===1?1:0);S[k]=st;LS.set('srs',S);renderCards();renderTape()};el.querySelector('.no').onclick=()=>rate(false);el.querySelector('.yes').onclick=()=>rate(true)});tex($('#cardBox'))}
+renderCards();
+
+/* ---------- boot ---------- */
+renderTape();const h=(location.hash||'').slice(1);go(document.getElementById(h)?h:LS.get('tab','t61'));setTimeout(()=>window.scrollTo(0,0),0);
+})();
+</script>
+</body>
+</html>
