@@ -239,13 +239,27 @@ svg .ink{fill:var(--hi)} svg .lbl{fill:var(--label);font-family:var(--f-mono);fo
 .fitem>.tx .katex,.fitem>.tx math{white-space:normal}
 .fitem .nm{font-family:var(--f-mono);color:var(--label);font-size:.82rem}.fitem .tx{color:var(--formula)}.fitem .s{font-size:.66rem;color:var(--dim);font-family:var(--f-mono);text-align:right}
 
+
+/* definition panel */
+.defn{background:var(--sheet);border:1px solid var(--line);border-left:4px solid var(--gold);padding:0 16px 14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:18px;align-items:center}
+.defn>h3{grid-column:1/-1;margin:0 -16px 0 -16px;padding:5px 16px;background:var(--hdr);color:var(--hi);font-size:.78rem}
+.dtext{min-width:0}
+.dterm{font-family:var(--f-mono);font-size:1.05rem;color:var(--gold);font-weight:600;margin:.2rem 0}
+.dterm i{color:var(--label);font-size:.85rem}
+.dfig{margin:0;min-width:0}
+.dfig svg{width:100%;height:auto;max-width:100%}
+.dl{color:var(--blue)}.db{color:var(--bear)}.dm{color:var(--gold)}
+.dleg{display:flex;flex-direction:column;gap:2px;margin-top:.6rem;font-size:.86rem}
+.dleg div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;background:var(--paper);padding:5px 10px}
+.dleg b{font-family:var(--f-mono);font-size:.76rem;font-weight:600}
+
 /* wide screens: panels flow into columns like a multi-window terminal */
 @media (min-width: 1380px){
   .wrap{max-width:none}
   section.dense.on{display:block;column-count:2;column-gap:12px}
   section.dense>*,section.dense .grid2>*{break-inside:avoid;margin:0 0 12px}
   section.dense .grid2{display:contents}
-  section.dense>.hero,section.dense>.chain,section.dense>h3.plain,section.dense>.lab{column-span:all}
+  section.dense>.hero,section.dense>.chain,section.dense>h3.plain,section.dense>.lab,section.dense>.defn{column-span:all}
   .tq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
   .tq>.btn,.tq>.block{grid-column:1/-1;justify-self:start}
   .flist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -280,7 +294,8 @@ svg .ink{fill:var(--hi)} svg .lbl{fill:var(--label);font-family:var(--f-mono);fo
   .cmdbar .menu{display:block}
   .cmdbar .clock{display:none}
   .wrap{padding:12px 16px 70px}
-  .hero,.grid2,.lab{grid-template-columns:1fr}
+  .hero,.grid2,.lab,.defn{grid-template-columns:1fr}
+  .dleg div{grid-template-columns:1fr;gap:2px}
   .grid3{grid-template-columns:1fr}
   .glos{grid-template-columns:1fr}
   .fitem{grid-template-columns:1fr}.fitem .s{text-align:left}
@@ -857,6 +872,28 @@ svg .ink{fill:var(--hi)} svg .lbl{fill:var(--label);font-family:var(--f-mono);fo
     </div>
   </div>
 
+  <div class="defn">
+    <h3>Definition · Point M, the tangency portfolio</h3>
+    <div class="dtext">
+      <p class="dterm">Point M <i>(Tangency Portfolio or Optimal Risky Portfolio)</i></p>
+      <p>is the <b>unique point</b> where the <b>CAL<sub>M</sub></b> is <b>tangent to the Markowitz Efficient Frontier</b>, thereby <b>maximizing the Sharpe Ratio</b> (the slope of the line): it achieves the <b>highest excess return per unit of risk</b> assumed.</p>
+      <span class="txd" data-tex="\text{Sharpe}_M = \text{slope of } CAL_M = \frac{E(R_M)-R_f}{\sigma_M} = \max"></span>
+      <p>Because it lies on the Efficient Frontier, it is the portfolio with the <b>lowest possible risk for its expected return</b> using <b>only risky assets</b>.</p>
+      <p>At this point the investor puts <b>100% of their own capital in risky assets</b>:</p>
+      <span class="txd" data-tex="w_M = 1,\qquad w_{RFR} = 0"></span>
+      <p>So M is the <b>exact boundary</b> between the <span class="dl">lending segment</span> (to the left) and the <span class="db">borrowing segment</span> (to the right).</p>
+      <div class="dleg">
+        <div><b class="dl">Lending · R<sub>f</sub> → M</b><span>0 &lt; w<sub>M</sub> &lt; 1, w<sub>RFR</sub> &gt; 0. Part of the wealth is lent at R<sub>f</sub> (point X).</span></div>
+        <div><b class="dm">At M</b><span>w<sub>M</sub> = 1, w<sub>RFR</sub> = 0. All wealth is in the optimal risky portfolio.</span></div>
+        <div><b class="db">Borrowing · beyond M</b><span>w<sub>M</sub> &gt; 1, w<sub>RFR</sub> &lt; 0. The investor borrows at R<sub>f</sub> to invest more than their wealth (point L).</span></div>
+      </div>
+    </div>
+    <figure class="dfig">
+      <svg id="defSvg" viewBox="0 0 640 430" role="img" aria-label="Markowitz efficient frontier with CAL A, CAL B and CAL M (CML) tangent at M, lending and borrowing segments, points X and L"></svg>
+      <figcaption class="src">Schematic drawn to scale (R<sub>f</sub> = 3%). The labels follow the slides: Portfolio A and B, CAL<sub>A</sub>, CAL<sub>B</sub>, CAL<sub>M</sub>, X, L. Above the CML = not achievable; below = inefficient.</figcaption>
+    </figure>
+  </div>
+
   <div class="grid2">
     <div class="block"><h3>Two questions for this part</h3>
       <ol><li>How does the efficient frontier change when we introduce a risk-free asset?</li><li>How do we find the optimal risky portfolio?</li></ol>
@@ -1381,6 +1418,38 @@ function tangency(f,rf,ex){let best=-1e9,bw=0,bp=null;for(let i=0;i<=1000;i++){c
   s+=`<circle cx="${A.X(L[0])}" cy="${A.Y(L[1])}" r="4" fill="var(--blue)"/><text x="${A.X(L[0])-8}" y="${A.Y(L[1])-4}" text-anchor="end" style="fill:var(--blue)">L borrowing</text>`;
   s+=`<text x="${A.X(15)+4}" y="${A.Y(10)+18}" style="fill:var(--bull)">frontier ↗</text>`;
   $('#calHero').innerHTML=s})();
+(function defChart(){const rf=3,sg=8,Eg=6,k=.55,sd=E=>Math.sqrt(sg*sg+((E-Eg)/k)**2);let M=null,sr=-1;for(let E=Eg;E<=30;E+=.001){const r=(E-rf)/sd(E);if(r>sr){sr=r;M=[sd(E),E]}}
+  const W=640,H=430,m={l:46,r:16,t:20,b:38};const A=axes(W,H,m,[0,30],[0,24],[0,5,10,15,20,25,30],[0,4,8,12,16,20,24],'σ (risk) %','E(R) %',v=>v,v=>v);let s=A.s;
+  const X=A.X,Y=A.Y,cv=(a,b)=>{const p=[];for(let E=a;E<=b+1e-9;E+=.05)p.push([sd(E),E]);return p.map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1)).join('')};
+  const ang=sl=>Math.atan2(Y(sl)-Y(0),X(1)-X(0))*180/Math.PI;
+  const ln=(sl,x2,col,w,da)=>`<path d="M${X(0)} ${Y(rf)} L${X(x2)} ${Y(rf+sl*x2)}" stroke="${col}" stroke-width="${w}" ${da?`stroke-dasharray="${da}"`:''} fill="none"/>`;
+  const lab=(x,y,t,st,a,anc)=>`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" ${a?`transform="rotate(${a.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"`:''} text-anchor="${anc||'start'}" style="${st}">${t}</text>`;
+  const PA=[sd(5),5],PB=[sd(8),8],sA=(PA[1]-rf)/PA[0],sB=(PB[1]-rf)/PB[0],Etop=18;
+  s+=lab(X(.8),Y(22.6),'NOT ACHIEVABLE · above the CML','fill:var(--dim);font-size:10px;letter-spacing:.06em');
+  s+=lab(X(29.5),Y(4.6),'INEFFICIENT · below the frontier','fill:var(--dim);font-size:10px;letter-spacing:.06em',0,'end');
+  s+=ln(sA,29.5,'var(--dim)',1.3,'4 3')+lab(X(21),Y(rf+sA*21)+14,'CAL<tspan font-size="8">A</tspan>','fill:var(--dim)',ang(sA),'middle');
+  s+=ln(sB,29.5,'var(--label)',1.3,'6 3')+lab(X(21),Y(rf+sB*21)+14,'CAL<tspan font-size="8">B</tspan>','fill:var(--label)',ang(sB),'middle');
+  s+=`<path d="${cv(.6,Eg)}" fill="none" stroke="var(--dim)" stroke-width="2" stroke-dasharray="5 4"/><path d="${cv(Eg,Etop)}" fill="none" stroke="var(--bull)" stroke-width="3.4"/>`;
+  s+=lab(X(sd(Etop))+5,Y(Etop)+16,'Markowitz','fill:var(--bull);font-weight:700')+lab(X(sd(Etop))+5,Y(Etop)+30,'efficient frontier','fill:var(--bull);font-weight:700');
+  s+=lab(X(sd(.6))+8,Y(.6)+2,'inefficient part','fill:var(--dim)');
+  s+=`<circle cx="${X(sg)}" cy="${Y(Eg)}" r="4" fill="var(--bull)"/>`+lab(X(sg)-7,Y(Eg)+4,'GMV','fill:var(--bull)',0,'end');
+  s+=`<path d="M${X(0)} ${Y(rf)} H${X(M[0])} V${Y(M[1])}" stroke="var(--gold)" stroke-width="1" stroke-dasharray="2 3" fill="none" opacity=".7"/>`;
+  s+=lab((X(0)+X(M[0]))/2,Y(rf)+14,'σ<tspan font-size="8">M</tspan>','fill:var(--gold)',0,'middle')+lab(X(M[0])+6,Y(9.6),'E(R<tspan font-size="8">M</tspan>) − R<tspan font-size="8">f</tspan>','fill:var(--gold)');
+  const xE=29.5;s+=`<path d="M${X(0)} ${Y(rf)} L${X(M[0])} ${Y(M[1])}" stroke="var(--blue)" stroke-width="4" fill="none"/><path d="M${X(M[0])} ${Y(M[1])} L${X(xE)} ${Y(rf+sr*xE)}" stroke="var(--bear)" stroke-width="4" stroke-dasharray="10 5" fill="none"/>`;
+  s+=lab(X(5.2),Y(rf+sr*5.2)-10,'LENDING · w<tspan font-size="8">RFR</tspan> &gt; 0','fill:var(--blue);font-weight:700;font-size:11px',ang(sr));
+  s+=lab(X(17.2),Y(rf+sr*17.2)-10,'BORROWING · w<tspan font-size="8">RFR</tspan> &lt; 0','fill:var(--bear);font-weight:700;font-size:11px',ang(sr));
+  s+=lab(X(xE),Y(rf+sr*xE)-10,'CAL<tspan font-size="8">M</tspan> = CML','fill:var(--gold);font-weight:700',ang(sr),'end');
+  s+=`<circle cx="${X(0)}" cy="${Y(rf)}" r="5" fill="var(--gold)"/>`+lab(X(0)+8,Y(rf)+16,'RFR 3%','fill:var(--gold)');
+  s+=`<circle cx="${X(PA[0])}" cy="${Y(PA[1])}" r="4.5" fill="var(--hi)"/>`+lab(X(PA[0])+8,Y(PA[1])+4,'Portfolio A','fill:var(--hi)');
+  s+=`<circle cx="${X(PB[0])}" cy="${Y(PB[1])}" r="4.5" fill="var(--hi)"/>`+lab(X(PB[0])+9,Y(PB[1])+4,'Portfolio B','fill:var(--hi)');
+  const PX=[3,rf+sr*3],PL=[26,rf+sr*26];
+  s+=`<circle cx="${X(PX[0])}" cy="${Y(PX[1])}" r="5" fill="var(--blue)"/>`+lab(X(PX[0])+4,Y(PX[1])+18,'X (lender)','fill:var(--blue)');
+  s+=`<circle cx="${X(PL[0])}" cy="${Y(PL[1])}" r="5" fill="var(--bear)"/>`+lab(X(PL[0])-6,Y(PL[1])-12,'L (borrower)','fill:var(--bear)',0,'end');
+  s+=`<circle cx="${X(M[0])}" cy="${Y(M[1])}" r="14" fill="var(--gold)" opacity=".18"/><circle cx="${X(M[0])}" cy="${Y(M[1])}" r="7.5" fill="var(--gold)"/>`;
+  const bx=X(M[0])-215,by=Y(M[1])-112;
+  s+=`<path d="M${X(M[0])-9} ${Y(M[1])-9} L${bx+172} ${by+54}" stroke="var(--gold)" stroke-width="1"/><rect x="${bx}" y="${by}" width="172" height="54" fill="var(--paper)" stroke="var(--gold)"/>`;
+  s+=lab(bx+9,by+17,'M · tangency portfolio','fill:var(--gold);font-weight:700')+lab(bx+9,by+32,'w<tspan font-size="8">M</tspan> = 1 · w<tspan font-size="8">RFR</tspan> = 0','fill:var(--hi)')+lab(bx+9,by+47,`max Sharpe = ${sr.toFixed(2)} = slope`,'fill:var(--hi)');
+  $('#defSvg').innerHTML=s})();
 function calLab(){const e1=+$('#cE1').value,s1=+$('#cS1').value,e2=+$('#cE2').value,s2=+$('#cS2').value,rho=+$('#cRhoR').value,rf=+$('#cRfR').value,t=+$('#cTR').value,W=+$('#cW').value||0;
   $('#cRho').textContent=rho.toFixed(2);$('#cRf').textContent=rf.toFixed(2)+'%';$('#cT').textContent=t.toFixed(1)+'%';
   const f=twoA(e1,s1,e2,s2,rho),T=tangency(f,rf,[e1,s1,e2,s2,rho]),pts=[];for(let i=0;i<=100;i++)pts.push(f(i/100));
@@ -1527,12 +1596,13 @@ function renderForm(q){q=(q||'').toLowerCase();const grp=f=>f[2].startsWith('T7 
 $('#fQ').oninput=e=>renderForm(e.target.value);renderForm();
 
 /* ---------- glossary ---------- */
-const GL=[['Capital Allocation Line (CAL)','Straight line of portfolios mixing the risk-free asset with one risky portfolio B; slope = Sharpe ratio of B.'],['Capital Market Line (CML)','The CAL of the tangency (market) portfolio M: the efficient set when a risk-free asset exists.'],['Tangency portfolio','Point where a line from Rf touches the efficient frontier; the risky portfolio with the maximum Sharpe ratio (M or T).'],['Two-fund separation theorem','All investors hold a combination of the risk-free asset and the same optimal risky portfolio; preferences only set the mix.'],['Lender (CML)','Investor with part of wealth in the risk-free asset (between Rf and M).'],['Borrower (CML)','Investor who borrows at Rf to invest more than their wealth in M (beyond M, w_M > 1).'],['Market portfolio','All tradable, investable assets; in practice proxied by an index such as the S&P 500.'],['Risk-neutral investor','Cares only about expected return, not risk.'],['Intrinsic value','Theoretically correct (fair) value of an asset based on its fundamentals.'],['Stakeholder','Any entity with a vested interest in an organization and affected by its performance.'],['Shareholder','Owner of at least one share of the company.'],['Trading comps','Relative valuation using multiples of similar listed companies.'],['Enterprise value (EV)','Approximate value of the operating business: equity + debt − cash.'],['Equity value','Value of all shares together (market capitalization).'],['EBITDA','Earnings before interest, taxes, depreciation and amortization. Not a cash flow.'],['LTM','Last twelve months: historical financial figures.'],['Forward multiple','Multiple based on analysts\' forecast figures (e.g. forward P/E with next year\'s EPS).'],['Diluted shares','Shares outstanding including the effect of options and convertibles.'],['Outlier','An extreme multiple that distorts the mean.'],['Book (carrying) value','Value at which an item is recorded on the balance sheet.'],['Adjusted NAV','Assets at estimated current value minus liabilities.'],['Cost model (IAS 16.30)','PP&E at cost less accumulated depreciation and impairment.'],['Revaluation model (IAS 16.31)','PP&E at fair value at revaluation less later depreciation and impairment.'],['Payout ratio','Dividends ÷ net income (DPS ÷ EPS).'],['Retention rate (b)','1 − payout ratio.'],['Declaration date','Date the company announces or approves the dividend.'],['Ex-dividend date','From this date new buyers do not receive the upcoming dividend.'],['Record date','Date the company identifies shareholders entitled to the dividend.'],['Payment date','Date the cash is paid.'],['Special dividend','Extra, non-recurring cash dividend.'],['Stock dividend','Distribution of additional shares instead of cash.'],['Scrip / flexible dividend','Shareholders choose cash or shares (and, in Spain, can sell rights).'],['Free allocation right','Derecho de asignación gratuita: one per share; a fixed number gives one new share.'],['Share premium','Amount paid above nominal value when shares are issued.'],['Capital reduction','Cash returned by lowering the nominal value of shares.'],['Share repurchase (buyback)','Company buys back its own shares.'],['DDM','Dividend discount model: PV of expected dividends.'],['Cost of equity (kₑ)','Required return of shareholders; often from CAPM.'],['Beta (β)','Sensitivity of a stock\'s return to market returns (systematic risk).'],['Equity risk premium','rₘ − r_f.'],['Gordon growth model','Constant-growth perpetuity DDM: D₁/(k − g).'],['Multistage DDM','DDM with different growth rates for different periods.'],['Terminal value','Value at the start of the constant-growth stage.'],['Portfolio weight','Share of total invested wealth in one asset; weights sum to 1.'],['Variance','Expected squared deviation from the mean; measures dispersion.'],['Standard deviation','Square root of variance; same units as returns.'],['Covariance','Degree to which two returns move together.'],['Correlation (ρ)','Covariance scaled to [−1, +1].'],['Opportunity (feasible) set','All risk–return combinations attainable from the assets.'],['Minimum-variance frontier','Lowest variance for each level of expected return.'],['Global minimum-variance portfolio','Lowest-risk portfolio on the MVF.'],['Efficient frontier','Part of the MVF above the GMV portfolio.'],['Systematic risk','Market-wide risk that cannot be diversified away.'],['Unsystematic risk','Firm-specific (idiosyncratic) risk, reduced by diversification.'],['Diversification ratio','Weighted average σ ÷ portfolio σ.'],['Sharpe ratio','Excess return per unit of risk.'],['CAL','Capital allocation line: combinations of the risk-free asset and a risky portfolio.'],['VaR','Value at Risk: loss threshold at a confidence level (CFA Level II).']];
+const GL=[['Capital Allocation Line (CAL)','Straight line of portfolios mixing the risk-free asset with one risky portfolio B; slope = Sharpe ratio of B.'],['Capital Market Line (CML)','The CAL of the tangency (market) portfolio M: the efficient set when a risk-free asset exists.'],['Tangency portfolio (point M)','Unique point where CAL_M is tangent to the Markowitz efficient frontier: maximum Sharpe ratio (highest excess return per unit of risk). Lowest risk for its return using only risky assets; w_M = 1, w_RFR = 0; boundary between the lending (left) and borrowing (right) segments.'],['Two-fund separation theorem','All investors hold a combination of the risk-free asset and the same optimal risky portfolio; preferences only set the mix.'],['Lender (CML)','Investor with part of wealth in the risk-free asset (between Rf and M).'],['Borrower (CML)','Investor who borrows at Rf to invest more than their wealth in M (beyond M, w_M > 1).'],['Market portfolio','All tradable, investable assets; in practice proxied by an index such as the S&P 500.'],['Risk-neutral investor','Cares only about expected return, not risk.'],['Intrinsic value','Theoretically correct (fair) value of an asset based on its fundamentals.'],['Stakeholder','Any entity with a vested interest in an organization and affected by its performance.'],['Shareholder','Owner of at least one share of the company.'],['Trading comps','Relative valuation using multiples of similar listed companies.'],['Enterprise value (EV)','Approximate value of the operating business: equity + debt − cash.'],['Equity value','Value of all shares together (market capitalization).'],['EBITDA','Earnings before interest, taxes, depreciation and amortization. Not a cash flow.'],['LTM','Last twelve months: historical financial figures.'],['Forward multiple','Multiple based on analysts\' forecast figures (e.g. forward P/E with next year\'s EPS).'],['Diluted shares','Shares outstanding including the effect of options and convertibles.'],['Outlier','An extreme multiple that distorts the mean.'],['Book (carrying) value','Value at which an item is recorded on the balance sheet.'],['Adjusted NAV','Assets at estimated current value minus liabilities.'],['Cost model (IAS 16.30)','PP&E at cost less accumulated depreciation and impairment.'],['Revaluation model (IAS 16.31)','PP&E at fair value at revaluation less later depreciation and impairment.'],['Payout ratio','Dividends ÷ net income (DPS ÷ EPS).'],['Retention rate (b)','1 − payout ratio.'],['Declaration date','Date the company announces or approves the dividend.'],['Ex-dividend date','From this date new buyers do not receive the upcoming dividend.'],['Record date','Date the company identifies shareholders entitled to the dividend.'],['Payment date','Date the cash is paid.'],['Special dividend','Extra, non-recurring cash dividend.'],['Stock dividend','Distribution of additional shares instead of cash.'],['Scrip / flexible dividend','Shareholders choose cash or shares (and, in Spain, can sell rights).'],['Free allocation right','Derecho de asignación gratuita: one per share; a fixed number gives one new share.'],['Share premium','Amount paid above nominal value when shares are issued.'],['Capital reduction','Cash returned by lowering the nominal value of shares.'],['Share repurchase (buyback)','Company buys back its own shares.'],['DDM','Dividend discount model: PV of expected dividends.'],['Cost of equity (kₑ)','Required return of shareholders; often from CAPM.'],['Beta (β)','Sensitivity of a stock\'s return to market returns (systematic risk).'],['Equity risk premium','rₘ − r_f.'],['Gordon growth model','Constant-growth perpetuity DDM: D₁/(k − g).'],['Multistage DDM','DDM with different growth rates for different periods.'],['Terminal value','Value at the start of the constant-growth stage.'],['Portfolio weight','Share of total invested wealth in one asset; weights sum to 1.'],['Variance','Expected squared deviation from the mean; measures dispersion.'],['Standard deviation','Square root of variance; same units as returns.'],['Covariance','Degree to which two returns move together.'],['Correlation (ρ)','Covariance scaled to [−1, +1].'],['Opportunity (feasible) set','All risk–return combinations attainable from the assets.'],['Minimum-variance frontier','Lowest variance for each level of expected return.'],['Global minimum-variance portfolio','Lowest-risk portfolio on the MVF.'],['Efficient frontier','Part of the MVF above the GMV portfolio.'],['Systematic risk','Market-wide risk that cannot be diversified away.'],['Unsystematic risk','Firm-specific (idiosyncratic) risk, reduced by diversification.'],['Diversification ratio','Weighted average σ ÷ portfolio σ.'],['Sharpe ratio','Excess return per unit of risk.'],['CAL','Capital allocation line: combinations of the risk-free asset and a risky portfolio.'],['VaR','Value at Risk: loss threshold at a confidence level (CFA Level II).']];
 function renderGlos(q){q=(q||'').toLowerCase();$('#gList').innerHTML=GL.filter(g=>!q||(g[0]+g[1]).toLowerCase().includes(q)).sort((a,b)=>a[0].localeCompare(b[0])).map(g=>`<div><b>${g[0]}</b><br>${g[1]}</div>`).join('')}
 $('#gQ').oninput=e=>renderGlos(e.target.value);renderGlos();
 
 /* ---------- flashcards ---------- */
 const CARDS=[
+ ['cml','Point M: definition','Unique tangency of CAL_M with the Markowitz efficient frontier → max Sharpe. w_M = 1, w_RFR = 0: boundary between lending (left) and borrowing (right).'],
  ['cml','Risk-free asset: 3 properties','Return known in advance (Rf) · variance 0 · covariance/correlation 0 with any asset'],
  ['cml','Why is the CAL straight?','s_f = 0 and ρ = 0 → s_np = w_B s_B, so E(R_np) = Rf + [(E(R_B) − Rf)/s_B] × s_np'],
  ['cml','Slope of the CAL','(E(R_B) − Rf)/σ_B = Sharpe ratio. Optimal M = max slope.'],
